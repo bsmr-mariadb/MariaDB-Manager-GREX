@@ -14,7 +14,7 @@ Release: 		%{release}
 Source: 		%{name}-%{version}-%{release}.tar.gz
 Prefix: 		/
 Group: 			Development/Tools
-Requires:		
+Requires:		curl
 #BuildRequires:		
 
 %description
