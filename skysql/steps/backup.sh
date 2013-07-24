@@ -28,6 +28,8 @@
 # $1: Backup type ("Full" or "Incremental")
 # $2: Base BackupID (only required if $1 = "Incremental)
 
+echo "-- Command start: backup"
+
 # Parameter validation
 if [ "$1" == "" ] ; then
 	echo 'Error: $0 invoked with no parameters'

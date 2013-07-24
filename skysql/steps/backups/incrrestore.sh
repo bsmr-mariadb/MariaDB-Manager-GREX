@@ -1,6 +1,29 @@
 #!/bin/bash
 #
-
+#  Part of SkySQL Galera Cluster Remote Commands package
+#
+# This file is distributed as part of the SkySQL Galera Cluster Remote Commands
+# package.  It is free software: you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation, version 2.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc., 51
+# Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+# Copyright 2013 (c) SkySQL Ab 
+#
+# Author: Marcos Amaral
+# Date: July 2013
+#
+#
+# This script restores an incremental backup on the database
+#
 
 . ./mysql-config.sh
 
@@ -112,7 +135,7 @@ else
 fi
 
 # Stopping mysqld
-./steps/stop.sh
+/etc/init.d/mysql stop
 
 if [[ `mysqladmin $USEROPTIONS status | awk '{print $1}'` == "Uptime:" ]]; then
 	echo "HALTED: Server not properly shut down"
@@ -124,6 +147,9 @@ mv $DATAFOLDER/* $RESTOREPATH/mysql_tmp_cp/
 
 # Restore by copyback of the backup folder into data folder
 innobackupex $USEROPTIONS --defaults-file $my_cnf_file --copy-back $RESTOREPATH/extr/ &> $TMPFILE
+
+# Changing mysql data folder ownership back to mysql
+chown -R mysql:mysql $DATAFOLDER
 
 if [ -z "`tail -1 $TMPFILE | grep 'completed OK!'`" ] ; then
  echo "Restore failed - stage 'copyback backup':"; 
@@ -137,7 +163,7 @@ else
 fi
 
 # Restarting mysqld
-./steps/start.sh
+/etc/init.d/mysql start --wsrep-cluster-address=gcomm://
 
 sleep 10
 
@@ -146,8 +172,7 @@ if [ ! `mysqladmin $USEROPTIONS status | awk '{print $1}'` == "Uptime:" ]; then
  exit 1
 fi
 
-# Changing mysql data folder ownership back to mysql
-chown -R mysql:mysql $DATAFOLDER
+mysql -u $mysql_user -p$mysql_pwd -e "SET GLOBAL wsrep_provider=none;"
 
 # Cleanup phase
 rm -fR $RESTOREPATH/mysql_tmp_cp/*

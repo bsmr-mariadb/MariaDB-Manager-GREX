@@ -8,6 +8,8 @@ fi
 . ./mysql-config.sh
 . ./restfulapicredentials.sh
 
+echo "-- Command start: restore"
+
 export node_id=$scds_node_id
 export system_id=$scds_system_id
 export BACKUPID=$1

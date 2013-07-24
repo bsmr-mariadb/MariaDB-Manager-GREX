@@ -73,7 +73,7 @@ else
 fi
 
 # Stopping mysqld
-./steps/stop.sh
+/etc/init.d/mysql stop
 
 mysql_status=`mysqladmin $USEROPTIONS status | awk '{print $1}'`
 
@@ -103,7 +103,7 @@ fi
 chown -R mysql:mysql $DATAFOLDER
 
 # Restarting mysqld
-./steps/start.sh
+/etc/init.d/mysql start --wsrep-cluster-address=gcomm://
 
 sleep 10
 
@@ -111,6 +111,8 @@ if [ ! `mysqladmin $USEROPTIONS status | awk '{print $1}'` == "Uptime:" ]; then
  echo "HALTED: Server not properly started"
  exit 1
 fi
+
+mysql -u $mysql_user -p$mysql_pwd -e "SET GLOBAL wsrep_provider=none;"
 
 # Cleanup phase
 rm -fR $RESTOREPATH/mysql_tmp_cp/*

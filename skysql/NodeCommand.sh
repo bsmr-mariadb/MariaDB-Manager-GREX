@@ -28,16 +28,22 @@
 # $1: Step to be executed
 # $2-@: Step script-specific parameters
 
+log=/var/log/skysql-remote-exec.log
+
 step_script=$1
 shift
 params=$@
 
 scripts_dir=`dirname $0`
 
+echo "- Command request:" >> $log
+
 # Executing the script corresponding to the step
 cd $scripts_dir
 fullpath="$scripts_dir/steps/$step_script.sh $params"
-sh $fullpath            >> /var/log/SDS.log 2>&1
+sh $fullpath            >> $log 2>&1
+
+echo "----------------------------------------------------------" >> $log
 
 # Putting script exit code on output for the API-side to be able to read it via ssh
 echo $?

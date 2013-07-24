@@ -29,6 +29,8 @@
 
 . ./mysql-config.sh
 
+echo "-- Command start: recover"
+
 # Getting the IP of an online node
 cluster_online_ip=`./get-online-node.sh`
 

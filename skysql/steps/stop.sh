@@ -25,4 +25,6 @@
 # This script is executed by NodeCommand.sh to terminate mysqld.
 #
 
+echo "-- Command start: stop"
+
 /etc/init.d/mysql stop

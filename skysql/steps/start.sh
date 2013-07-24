@@ -26,6 +26,8 @@
 # with the rest of the cluster (if there are any nodes online).
 #
 
+echo "-- Command start: start"
+
 # Getting the IP of an online node
 cluster_online_ip=`./get-online-node.sh`
 

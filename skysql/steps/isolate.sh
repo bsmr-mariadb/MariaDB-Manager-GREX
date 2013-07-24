@@ -27,4 +27,7 @@
 #
 
 . ./mysql-config.sh
+
+echo "-- Command start: isolate"
+
 mysql -u $mysql_user -p$mysql_pwd -e "SET GLOBAL wsrep_provider=none; SET GLOBAL wsrep_cluster_address='gcomm://';"
