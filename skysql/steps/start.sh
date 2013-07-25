@@ -28,6 +28,19 @@
 
 echo "-- Command start: start"
 
+while true
+do
+	cur_commands=`./get-current-commands.sh`
+	if [[ "$cur_commands" == "0" ]]; then
+		break
+	fi
+	echo "Command running"
+	sleep 1
+done
+
+# Setting the state of the command to running
+./restfulapi-call.sh "PUT" "task/$taskid" "state=2"
+
 # Getting the IP of an online node
 cluster_online_ip=`./get-online-node.sh`
 
@@ -36,3 +49,18 @@ if [ -n "$cluster_online_ip" ]; then
 else # Starting a new cluster
 	/etc/init.d/mysql start --wsrep-cluster-address=gcomm://
 fi
+
+no_retries=0
+while [ $no_retries -lt 30 ]
+do
+        sleep 1
+        node_state=`./get-node-state.sh`
+        if [[ "$node_state" == "104" ]]; then
+                echo "-- Command finished: success"
+                exit 0
+        fi
+        no_retries=$((no_retries + 1))
+done
+echo "-- Command finished: error"
+exit 1
+

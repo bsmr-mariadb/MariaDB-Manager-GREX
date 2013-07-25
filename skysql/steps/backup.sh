@@ -52,6 +52,9 @@ else
 	exit 1
 fi
 
+# Setting the state of the command to running
+./restfulapi-call.sh "PUT" "task/$taskid" "state=2"
+
 . ./mysql-config.sh
 . ./restfulapicredentials.sh
 

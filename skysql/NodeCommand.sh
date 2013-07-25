@@ -31,7 +31,8 @@
 log=/var/log/skysql-remote-exec.log
 
 step_script=$1
-shift
+export taskid=$2
+shift 2
 params=$@
 
 scripts_dir=`dirname $0`
@@ -42,8 +43,9 @@ echo "- Command request:" >> $log
 cd $scripts_dir
 fullpath="$scripts_dir/steps/$step_script.sh $params"
 sh $fullpath            >> $log 2>&1
+return_status=$?
 
 echo "----------------------------------------------------------" >> $log
 
 # Putting script exit code on output for the API-side to be able to read it via ssh
-echo $?
+echo $return_status
