@@ -28,21 +28,21 @@
 echo "-- Command start: stop"
 
 # Setting the state of the command to running
-./restfulapi-call.sh "PUT" "task/$taskid" "state=2"
+./restfulapi-call.sh "PUT" "task/$taskid" "state=2" > /dev/null
 
 /etc/init.d/mysql stop
 
-no_retries=0
-while [ $no_retries -lt 30 ]
+no_retries=30
+while [ $no_retries -gt 0 ]
 do
         sleep 1
         node_state=`./get-node-state.sh`
         if [[ "$node_state" == "100" ]]; then
-                echo "-- Command finished: success"
+                echo "-- Command finished successfully"
                 exit 0
         fi
-        no_retries=$((no_retries + 1))
+        no_retries=$((no_retries - 1))
 done
-echo "-- Command finished: error"
+echo "-- Command finished with an error: node state not OK"
 exit 1
 

@@ -28,18 +28,24 @@
 
 echo "-- Command start: start"
 
-while true
+no_retries=120
+while [ $no_retries -gt 0 ]
 do
 	cur_commands=`./get-current-commands.sh`
 	if [[ "$cur_commands" == "0" ]]; then
 		break
 	fi
-	echo "Command running"
 	sleep 1
+	no_retries=$((no_retries - 1))
 done
 
+if [ $no_retries -eq 0 ]; then
+	echo "-- Command aborted: system busy with other commands"
+	exit 1
+fi
+
 # Setting the state of the command to running
-./restfulapi-call.sh "PUT" "task/$taskid" "state=2"
+./restfulapi-call.sh "PUT" "task/$taskid" "state=2" > /dev/null
 
 # Getting the IP of an online node
 cluster_online_ip=`./get-online-node.sh`
@@ -50,17 +56,17 @@ else # Starting a new cluster
 	/etc/init.d/mysql start --wsrep-cluster-address=gcomm://
 fi
 
-no_retries=0
-while [ $no_retries -lt 30 ]
+no_retries=30
+while [ $no_retries -gt 0 ]
 do
         sleep 1
         node_state=`./get-node-state.sh`
         if [[ "$node_state" == "104" ]]; then
-                echo "-- Command finished: success"
+                echo "-- Command finished successfully"
                 exit 0
         fi
-        no_retries=$((no_retries + 1))
+        no_retries=$((no_retries - 1))
 done
-echo "-- Command finished: error"
+echo "-- Command finished with an error: node state not OK"
 exit 1
 

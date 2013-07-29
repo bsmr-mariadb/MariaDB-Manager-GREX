@@ -30,31 +30,21 @@
 
 echo "-- Command start: isolate"
 
-while true
-do
-        cur_commands=`./get-current-commands.sh`
-        if [[ "$cur_commands" == "0" ]]; then
-                break
-        fi
-        echo "Command running"
-        sleep 1
-done
-
 # Setting the state of the command to running
-./restfulapi-call.sh "PUT" "task/$taskid" "state=2"
+./restfulapi-call.sh "PUT" "task/$taskid" "state=2" > /dev/null
 
 mysql -u $mysql_user -p$mysql_pwd -e "SET GLOBAL wsrep_provider=none; SET GLOBAL wsrep_cluster_address='gcomm://';"
 
-no_retries=0
-while [ $no_retries -lt 30 ]
+no_retries=30
+while [ $no_retries -gt 0 ]
 do
 	sleep 1
 	node_state=`./get-node-state.sh`
 	if [[ "$node_state" == "107" ]]; then
-		echo "-- Command finished: success"
+		echo "-- Command finished successfully"
 		exit 0
 	fi
-	no_retries=$((no_retries + 1))
+	no_retries=$((no_retries - 1))
 done
-echo "-- Command finished: error"
+echo "-- Command finished with an error: node state not OK"
 exit 1

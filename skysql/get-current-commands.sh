@@ -30,10 +30,17 @@
 no_commands=0
 
 api_ret=`./restfulapi-call.sh "GET" "task" "state=2"`
-task_ids=`echo $api_ret | awk '{ gsub("^.*\\\[", "", $0); gsub("\\\].*", "", $0); print $0 }'`
+task_ids=`echo $api_ret | awk '{ gsub("^.*\\\[", "", $0); gsub("\\\].*", "", $0); 
+				gsub("\"", "", $0); print $0 }'`
 
 if [[ ! "$task_ids" == "" ]]; then
-        running_commands=`echo $task_ids | awk 'BEGIN { RS="}," } END { print NR }'`
+        running_commands=`echo $task_ids | awk -v cur_task_id=$taskid '
+		BEGIN { RS="},"; FS=","; counter=0 } { 
+			split($1, a, ":"); 
+			if (a[2] != cur_task_id)
+				counter++;
+		} 
+		END { print counter }'`
         no_commands=$((no_commands + running_commands))
 fi
 

@@ -11,7 +11,7 @@ fi
 echo "-- Command start: restore"
 
 # Setting the state of the command to running
-./restfulapi-call.sh "PUT" "task/$taskid" "state=2"
+./restfulapi-call.sh "PUT" "task/$taskid" "state=2" > /dev/null
 
 export node_id=$scds_node_id
 export system_id=$scds_system_id

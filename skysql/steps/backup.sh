@@ -53,7 +53,7 @@ else
 fi
 
 # Setting the state of the command to running
-./restfulapi-call.sh "PUT" "task/$taskid" "state=2"
+./restfulapi-call.sh "PUT" "task/$taskid" "state=2" > /dev/null
 
 . ./mysql-config.sh
 . ./restfulapicredentials.sh
