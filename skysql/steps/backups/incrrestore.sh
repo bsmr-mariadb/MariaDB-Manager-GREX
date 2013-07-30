@@ -41,7 +41,7 @@ USEROPTIONS="--user=$mysql_user --password=$mysql_pwd"
 DATAFOLDER=`cat $my_cnf_file | awk 'BEGIN { FS="=" } { if ($1 == "datadir") print $2 }'`
 
 if [ "$DATAFOLDER" == "" ] ; then
-	echo "Error: data folder not defined in MySQL configuration file"
+	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Data folder not defined in MySQL configuration file"
 	exit 1
 fi
 
@@ -72,7 +72,7 @@ prepareapply() {
 	# Preparing base backup
 	innobackupex $USEROPTIONS --defaults-file $my_cnf_file --apply-log --redo-only $RESTOREPATH/extr &> $TMPFILE
 	if [ -z "`tail -1 $TMPFILE | grep 'completed OK!'`" ] ; then
-		echo "Restore failed (stage 'preparing the backup'):"; echo
+		echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "Restore failed (stage 'preparing the backup'):"; echo
 		echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
 		cat $TMPFILE
 		rm -f $TMPFILE
@@ -125,7 +125,7 @@ rm -fR $RESTOREPATH/incr/*
 getbackups
 
 if [ -z "`tail -1 $TMPFILE | grep 'completed OK!'`" ] ; then
-	echo "Restore failed - stage 'preparing the backup':"; 
+	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Restore failed - stage 'preparing the backup':"; 
 	echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
 	cat $TMPFILE
 	rm -f $TMPFILE
@@ -138,7 +138,7 @@ fi
 /etc/init.d/mysql stop
 
 if [[ `mysqladmin $USEROPTIONS status | awk '{print $1}'` == "Uptime:" ]]; then
-	echo "HALTED: Server not properly shut down"
+	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Server not properly shut down"
 	exit 1
 fi
 
@@ -152,7 +152,7 @@ innobackupex $USEROPTIONS --defaults-file $my_cnf_file --copy-back $RESTOREPATH/
 chown -R mysql:mysql $DATAFOLDER
 
 if [ -z "`tail -1 $TMPFILE | grep 'completed OK!'`" ] ; then
- echo "Restore failed - stage 'copyback backup':"; 
+ echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Restore failed - stage 'copyback backup':"; 
  echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
 
  cat $TMPFILE
@@ -168,7 +168,7 @@ fi
 sleep 10
 
 if [ ! `mysqladmin $USEROPTIONS status | awk '{print $1}'` == "Uptime:" ]; then
- echo "HALTED: Server not properly started"
+ echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Server not properly started"
  exit 1
 fi
 

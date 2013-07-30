@@ -26,12 +26,13 @@
 # with the rest of the cluster (if there are any nodes online).
 #
 
-echo "-- Command start: start"
+echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: start"
 
 no_retries=120
 while [ $no_retries -gt 0 ]
 do
 	cur_commands=`./get-current-commands.sh`
+	echo $cur_commands
 	if [[ "$cur_commands" == "0" ]]; then
 		break
 	fi
@@ -40,7 +41,7 @@ do
 done
 
 if [ $no_retries -eq 0 ]; then
-	echo "-- Command aborted: system busy with other commands"
+	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Command aborted: system busy with other commands"
 	exit 1
 fi
 
@@ -62,11 +63,11 @@ do
         sleep 1
         node_state=`./get-node-state.sh`
         if [[ "$node_state" == "104" ]]; then
-                echo "-- Command finished successfully"
+                echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command finished successfully"
                 exit 0
         fi
         no_retries=$((no_retries - 1))
 done
-echo "-- Command finished with an error: node state not OK"
+echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Command finished with an error: node state not OK"
 exit 1
 

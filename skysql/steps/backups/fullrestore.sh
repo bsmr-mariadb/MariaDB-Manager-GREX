@@ -33,7 +33,7 @@ RESTOREPATH="/tmp"
 DATAFOLDER=`cat $my_cnf_file | awk 'BEGIN { FS="=" } { if ($1 == "datadir") print $2 }'`
 
 if [ "$DATAFOLDER" == "" ] ; then
-        echo "Error: data folder not defined in MySQL configuration file"
+        echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Data folder not defined in MySQL configuration file"
         exit 1
 fi
 
@@ -45,7 +45,7 @@ USEROPTIONS="--user=$mysql_user --password=$mysql_pwd"
 
 # Checking if the script can access the database
 if ! `echo 'exit' | /usr/bin/mysql -s $USEROPTIONS` ; then
-	echo "Error: Supplied mysql username or password appears to be incorrect "
+	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Supplied mysql username or password appears to be incorrect"
 	exit 1
 fi
 
@@ -78,7 +78,7 @@ fi
 mysql_status=`mysqladmin $USEROPTIONS status | awk '{print $1}'`
 
 if [[ "$mysql_status" == "Uptime:" ]]; then
-	echo "HALTED: Server not properly shut down"
+	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Server not properly shut down"
 	exit 1
 fi
 
@@ -89,7 +89,7 @@ mv $DATAFOLDER/* $RESTOREPATH/mysql_tmp_cp/
 innobackupex $USEROPTIONS --defaults-file=$my_cnf_file --copy-back $RESTOREPATH/extr/ &> $TMPFILE
 
 if [ -z "`tail -1 $TMPFILE | grep 'completed OK!'`" ] ; then
-	echo "Restore failed (stage 'copyback backup'):"; echo
+	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Restore failed (stage 'copyback backup'):"; echo
 	echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
 
 	cat $TMPFILE
@@ -108,7 +108,7 @@ chown -R mysql:mysql $DATAFOLDER
 sleep 10
 
 if [ ! `mysqladmin $USEROPTIONS status | awk '{print $1}'` == "Uptime:" ]; then
- echo "HALTED: Server not properly started"
+ echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Server not properly started"
  exit 1
 fi
 

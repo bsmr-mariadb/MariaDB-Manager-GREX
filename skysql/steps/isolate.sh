@@ -28,7 +28,7 @@
 
 . ./mysql-config.sh
 
-echo "-- Command start: isolate"
+echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: isolate"
 
 # Setting the state of the command to running
 ./restfulapi-call.sh "PUT" "task/$taskid" "state=2" > /dev/null
@@ -41,10 +41,10 @@ do
 	sleep 1
 	node_state=`./get-node-state.sh`
 	if [[ "$node_state" == "107" ]]; then
-		echo "-- Command finished successfully"
+		echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command finished successfully"
 		exit 0
 	fi
 	no_retries=$((no_retries - 1))
 done
-echo "-- Command finished with an error: node state not OK"
+echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Command finished with an error: node state not OK"
 exit 1

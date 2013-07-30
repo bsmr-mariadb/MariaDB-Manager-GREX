@@ -29,7 +29,7 @@
 
 . ./mysql-config.sh
 
-echo "-- Command start: recover"
+echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: recover"
 
 no_retries=120
 while [ $no_retries -gt 0 ]
@@ -43,7 +43,7 @@ do
 done
 
 if [ $no_retries -eq 0 ]; then
-        echo "-- Command aborted: system busy with other commands"
+        echo "ERROR : " `date "+%Y%m%d_%H%M%S"` "-- Command aborted: system busy with other commands"
         exit 1
 fi
 
@@ -60,13 +60,13 @@ if [ -n $cluster_online_ip ]; then
 	elif [ -f /usr/lib64/galera/libgalera_smm.so ]; then
 		mysql -u $mysql_user -p$mysql_pwd -e "SET GLOBAL wsrep_provider='/usr/lib64/galera/libgalera_smm.so';"
 	else
-		echo "Error: no Galera wsrep library found."
+		echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- No Galera wsrep library found."
 		exit 1
 	fi
 
 	mysql -u $mysql_user -p$mysql_pwd -e "SET GLOBAL wsrep_cluster_address='gcomm://$cluster_online_ip:4567';"
 else
-	echo "Error: no active cluster to rejoin."
+	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- No active cluster to rejoin."
 	exit 1
 fi
 
@@ -76,11 +76,11 @@ do
         sleep 1
         node_state=`./get-node-state.sh`
         if [[ "$node_state" == "104" ]]; then
-                echo "-- Command finished successfully"
+                echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command finished successfully"
                 exit 0
         fi
         no_retries=$((no_retries - 1))
 done
-echo "-- Command finished with an error: node state not OK"
+echo "ERROR :" `date "+%Y%m%d_%H%M%S"` -- Command finished with an error: node state not OK"
 exit 1
 

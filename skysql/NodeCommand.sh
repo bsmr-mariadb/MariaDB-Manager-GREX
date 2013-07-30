@@ -37,7 +37,8 @@ params=$@
 
 scripts_dir=`dirname $0`
 
-echo "- Command request:" >> $log
+echo "INFO :" `date "+%Y%m%d_%H%M%S"` "- Command request:" >> $log
+echo "INFO :" `date "+%Y%m%d_%H%M%S"` "- NodeCommand params: step_script $step_script; taskid $taskid; params $params" >> $log
 
 # Executing the script corresponding to the step
 cd $scripts_dir

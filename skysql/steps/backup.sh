@@ -28,11 +28,12 @@
 # $1: Backup type ("Full" or "Incremental")
 # $2: Base BackupID (only required if $1 = "Incremental)
 
-echo "-- Command start: backup"
+echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: backup"
+echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- params: backup_type $1; base_backup_id $2"
 
 # Parameter validation
 if [ "$1" == "" ] ; then
-	echo 'Error: $0 invoked with no parameters'
+	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- $0 invoked with no parameters"
 	exit 1
 fi
 
@@ -43,12 +44,12 @@ elif [[ "$1" == Incremental* ]] ; then
 	if [ $# -ge 2 ]; then
 		export BASEBACKUPID=$2
 	else
-		echo 'Error: if level is 2 (incremental) <basebackupid> is required'
+		echo "ERROR:" `date "+%Y%m%d_%H%M%S"` "if level is 2 (incremental) <basebackupid> is required"
                 echo 'Usage: $0 <system id> <node id> <level> [<basebackupid>]'
                 exit 1
 	fi
 else
-	echo 'Error: invalid parameters'
+	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Invalid parameters"
 	exit 1
 fi
 
@@ -74,7 +75,7 @@ elif [ $level -eq 2 ] ; then
 	./steps/backups/incrbackup.sh > /tmp/backup.log.$$
 	backupfilename="IncrBackup.$BACKUPID"
 else
-        echo 'Error: the level parameter must have a value of 1 (full) ou 2 (incremental)'
+        echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- level parameter must have a value of 1 (full) ou 2 (incremental)"
         exit 1
 fi
 
@@ -102,7 +103,7 @@ if [ $bkstatus -eq 0 ] ; then # Backup successful
 else # Backup unsuccessful
 	# Updating backup state (error)
 	./steps/backups/updatestatus.sh $BACKUPID 6
-	echo Started of failed backup log
+	echo "ERROR:" `date "+%Y%m%d_%H%M%S"` "-- Start of failed backup log"
 	cat /tmp/backup.log.$$
 	echo End of failed backup log
 	rm -f /tmp/backup.log.$$
