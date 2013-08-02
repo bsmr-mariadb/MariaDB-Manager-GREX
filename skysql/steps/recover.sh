@@ -28,10 +28,11 @@
 #
 
 . ./mysql-config.sh
+. ./remote-scripts-config.sh
 
 echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: recover"
 
-no_retries=120
+no_retries=$commands_wait_retries
 while [ $no_retries -gt 0 ]
 do
         cur_commands=`./get-current-commands.sh`
@@ -70,7 +71,7 @@ else
 	exit 1
 fi
 
-no_retries=30
+no_retries=$state_wait_retries
 while [ $no_retries -gt 0 ]
 do
         sleep 1

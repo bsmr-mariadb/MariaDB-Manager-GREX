@@ -27,6 +27,7 @@
 #
 
 . ./mysql-config.sh
+. ./remote-scripts-config.sh
 
 echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: isolate"
 
@@ -35,7 +36,7 @@ echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: isolate"
 
 mysql -u $mysql_user -p$mysql_pwd -e "SET GLOBAL wsrep_provider=none; SET GLOBAL wsrep_cluster_address='gcomm://';"
 
-no_retries=30
+no_retries=$state_wait_retries
 while [ $no_retries -gt 0 ]
 do
 	sleep 1

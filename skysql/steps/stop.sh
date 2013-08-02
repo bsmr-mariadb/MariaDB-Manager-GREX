@@ -25,6 +25,8 @@
 # This script is executed by NodeCommand.sh to terminate mysqld.
 #
 
+. ./remote-scripts-config.sh
+
 echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: stop"
 
 # Setting the state of the command to running
@@ -32,7 +34,7 @@ echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: stop"
 
 /etc/init.d/mysql stop
 
-no_retries=30
+no_retries=$state_wait_retries
 while [ $no_retries -gt 0 ]
 do
         sleep 1
