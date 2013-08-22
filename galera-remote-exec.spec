@@ -42,6 +42,10 @@ echo "skysqlagent ALL=NOPASSWD: /usr/local/sbin/skysql/NodeCommand.sh" >> /etc/s
 touch /var/log/skysql-remote-exec.log
 chown skysqlagent:skysqlagent /var/log/skysql-remote-exec.log
 
+# comment "requiretty" in the sudoers
+sed "s/Defaults.*requiretty/#Defaults     requiretty/g" /etc/sudoers > /etc/sudoers.tmp
+mv /etc/sudoers.tmp /etc/sudoers
+
 %install
 mkdir -p $RPM_BUILD_ROOT%{install_path}
 cp -r skysql $RPM_BUILD_ROOT%{install_path}
