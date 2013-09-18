@@ -32,16 +32,16 @@
 echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: isolate"
 
 # Setting the state of the command to running
-./restfulapi-call.sh "PUT" "task/$taskid" "state=2" > /dev/null
+./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
 
-mysql -u $mysql_user -p$mysql_pwd -e "SET GLOBAL wsrep_provider=none; SET GLOBAL wsrep_cluster_address='gcomm://';"
+mysql -u $mysql_user -p$mysql_pwd -e "SET GLOBAL wsrep_provider=none;"
 
 no_retries=$state_wait_retries
 while [ $no_retries -gt 0 ]
 do
 	sleep 1
 	node_state=`./get-node-state.sh`
-	if [[ "$node_state" == "107" ]]; then
+	if [[ "$node_state" == "isolated" ]]; then
 		echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command finished successfully"
 		exit 0
 	fi

@@ -48,7 +48,7 @@ if [ $no_retries -eq 0 ]; then
 fi
 
 # Setting the state of the command to running
-./restfulapi-call.sh "PUT" "task/$taskid" "state=2" > /dev/null
+./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
 
 # Getting the IP of an online node
 cluster_online_ip=`./get-online-node.sh`
@@ -64,7 +64,7 @@ while [ $no_retries -gt 0 ]
 do
         sleep 1
         node_state=`./get-node-state.sh`
-        if [[ "$node_state" == "104" ]]; then
+        if [[ "$node_state" == "joined" ]]; then
                 echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command finished successfully"
                 exit 0
         fi

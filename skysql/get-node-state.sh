@@ -27,9 +27,10 @@
 
 . ./restfulapicredentials.sh
 
-api_ret=`./restfulapi-call.sh "GET" "system/$scds_system_id/node/$scds_node_id" "fields=state"`
+api_ret=`./restfulapi-call.sh "GET" "system/$scds_system_id/node/$scds_node_id" "fields=state" \
+	| sed 's|^{"node":{||' | sed 's|}}$||'`
 
 sys_state=`echo $api_ret | awk 'BEGIN { FS=":" } /\"state\"/ {
-	gsub("^.*\\\[{", "", $0); gsub("}\\\].*", "", $0); gsub("\"", "", $0); 
+	gsub("\"", "", $0);
 	if ($1 == "state") print $2; }'`
 echo $sys_state

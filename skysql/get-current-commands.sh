@@ -29,7 +29,7 @@
 . ./restfulapicredentials.sh
 no_commands=0
 
-api_ret=`./restfulapi-call.sh "GET" "task" "state=2"`
+api_ret=`./restfulapi-call.sh "GET" "task" "state=running"`
 task_ids=`echo $api_ret | awk '{ gsub("^.*\\\[", "", $0); gsub("\\\].*", "", $0); 
 				gsub("\"", "", $0); print $0 }'`
 

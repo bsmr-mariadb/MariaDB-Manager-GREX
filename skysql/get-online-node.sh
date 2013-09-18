@@ -28,10 +28,10 @@
 
 . ./restfulapicredentials.sh
 
-api_node_list=`./restfulapi-call.sh GET system/$scds_system_id/node`
-node_list=`echo $api_node_list | sed 's|{"node":\[||' | sed 's|\]}||'`
+api_node_list=`./restfulapi-call.sh GET system/$scds_system_id/node "state=joined&fields=nodeid,privateip"`
+node_list=`echo $api_node_list | sed 's|{"nodes":\[||' | sed 's|\]}||'`
 
-echo $node_list | awk 'BEGIN { RS="}," } { sub(/^{/, "", $0); sub(/}$/, "", $0); print $0; }' | {
+echo $node_list | awk 'BEGIN { RS="}," } { sub(/^{/, "", $0); sub(/}.*$/, "", $0); print $0; }' | {
         node_array[0]=""
         i=0
         while read line; do
@@ -46,19 +46,20 @@ echo $node_list | awk 'BEGIN { RS="}," } { sub(/^{/, "", $0); sub(/}$/, "", $0);
 
         cluster_node_ip=""
         while [ $i -ge 0 ]; do
-                cluster_node_ip=`echo ${node_array[$i]} | awk 'BEGIN { RS=","; FS=":"; online=0; ip="" } {
+                cluster_node_ip=`echo ${node_array[$i]} | awk -v cur_node_id=$scds_node_id \
+		'BEGIN { RS=","; FS=":"; notcurrent=0; ip="" } {
                         for (i=1; i<=NF; i++) {
                                 if(length($i) > 1) {
-                                        sub(/^\"/, "", $i); sub(/\"$/, "", $i);
+                                        sub(/^\"/, "", $i); sub(/\".*$/, "", $i);
                                 }
                         }
-                        if ($1 == "state" && $2 == "104") {
-                                online = 1
+                        if ($1 == "nodeid" && $2 != $cur_node_id) {
+                                notcurrent = 1
                         }
-                        if ($1 == "privateIP") {
+                        if ($1 == "privateip") {
                                 ip = $2
                         }
-                } END { if (online) print ip; }'`
+                } END { if (notcurrent) print ip; }'`
                 if [ -n "$cluster_node_ip" ]; then
                         break
                 fi

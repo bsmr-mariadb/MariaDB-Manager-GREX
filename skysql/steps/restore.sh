@@ -39,7 +39,7 @@ echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: restore"
 echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- params: backup_id $1"
 
 # Setting the state of the command to running
-./restfulapi-call.sh "PUT" "task/$taskid" "state=2" > /dev/null
+./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
 
 export node_id=$scds_node_id
 export system_id=$scds_system_id

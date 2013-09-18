@@ -30,7 +30,7 @@
 echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: stop"
 
 # Setting the state of the command to running
-./restfulapi-call.sh "PUT" "task/$taskid" "state=2" > /dev/null
+./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
 
 /etc/init.d/mysql stop
 
@@ -39,7 +39,7 @@ while [ $no_retries -gt 0 ]
 do
         sleep 1
         node_state=`./get-node-state.sh`
-        if [[ "$node_state" == "100" ]]; then
+        if [[ "$node_state" == "down" ]]; then
                 echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command finished successfully"
                 exit 0
         fi
