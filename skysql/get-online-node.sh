@@ -53,7 +53,7 @@ echo $node_list | awk 'BEGIN { RS="}," } { sub(/^{/, "", $0); sub(/}.*$/, "", $0
                                         sub(/^\"/, "", $i); sub(/\".*$/, "", $i);
                                 }
                         }
-                        if ($1 == "nodeid" && $2 != $cur_node_id) {
+                        if ($1 == "nodeid" && $2 != cur_node_id) {
                                 notcurrent = 1
                         }
                         if ($1 == "privateip") {
