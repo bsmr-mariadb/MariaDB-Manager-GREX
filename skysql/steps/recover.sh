@@ -82,6 +82,6 @@ do
         fi
         no_retries=$((no_retries - 1))
 done
-echo "ERROR :" `date "+%Y%m%d_%H%M%S"` -- Command finished with an error: node state not OK"
+echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Command finished with an error: node state not OK"
 exit 1
 
