@@ -66,7 +66,7 @@ export system_id=$scds_system_id
 . ./steps/backups/createbackup.sh
 
 # Setting the backup state to 'scheduled'
-./steps/backups/updatestatus.sh $BACKUPID 1
+./steps/backups/updatestatus.sh $BACKUPID "scheduled"
 
 if [ $level -eq 1 ] ; then
 	./steps/backups/fullbackup.sh > /tmp/backup.log.$$
@@ -86,12 +86,12 @@ size=`du -k $backups_path/$backupfilename | awk '{ print $1 }'`
 if [ $bkstatus -eq 0 ] ; then # Backup successful
 	# Updating backup state (completed) and other data on the DB
 	if [ $level -eq 1 ] ; then
-		./steps/backups/updatestatus.sh $BACKUPID 5 size=$size \
+		./steps/backups/updatestatus.sh $BACKUPID "done" size=$size \
 			storage="$backups_path/$backupfilename" \
 			binlog="$binlogpos" \
 			log="$backups_path/Log.$BACKUPID"
 	elif [ $level -eq 2 ] ; then
-		./steps/backups/updatestatus.sh $BACKUPID 5 size=$size \
+		./steps/backups/updatestatus.sh $BACKUPID "done" size=$size \
                         log="$backups_path/Log.$BACKUPID" \
 			parent="$BASEBACKUPID" \
                         storage="$backups_path/$backupfilename" \
@@ -102,7 +102,7 @@ if [ $bkstatus -eq 0 ] ; then # Backup successful
 	mv /tmp/backup.log.$$ $backups_path/Log.$BACKUPID
 else # Backup unsuccessful
 	# Updating backup state (error)
-	./steps/backups/updatestatus.sh $BACKUPID 6
+	./steps/backups/updatestatus.sh $BACKUPID "error"
 	echo "ERROR:" `date "+%Y%m%d_%H%M%S"` "-- Start of failed backup log"
 	cat /tmp/backup.log.$$
 	echo End of failed backup log
