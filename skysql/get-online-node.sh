@@ -26,9 +26,7 @@
 # that can be used as a reference to the cluster
 #
 
-. ./restfulapicredentials.sh
-
-api_node_list=`./restfulapi-call.sh GET system/$scds_system_id/node "state=joined&fields=nodeid,privateip"`
+api_node_list=`./restfulapi-call.sh GET system/$system_id/node "state=joined&fields=nodeid,privateip"`
 node_list=`echo $api_node_list | sed 's|{"nodes":\[||' | sed 's|\]}||'`
 
 echo $node_list | awk 'BEGIN { RS="}," } { sub(/^{/, "", $0); sub(/}.*$/, "", $0); print $0; }' | {
@@ -46,7 +44,7 @@ echo $node_list | awk 'BEGIN { RS="}," } { sub(/^{/, "", $0); sub(/}.*$/, "", $0
 
         cluster_node_ip=""
         while [ $i -ge 0 ]; do
-                cluster_node_ip=`echo ${node_array[$i]} | awk -v cur_node_id=$scds_node_id \
+                cluster_node_ip=`echo ${node_array[$i]} | awk -v cur_node_id=$node_id \
 		'BEGIN { RS=","; FS=":"; notcurrent=0; ip="" } {
                         for (i=1; i<=NF; i++) {
                                 if(length($i) > 1) {

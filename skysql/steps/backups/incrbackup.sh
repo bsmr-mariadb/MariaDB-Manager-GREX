@@ -25,10 +25,8 @@
 # This script creates an incremental backup on the configurated directory
 #
 
-. ./mysql-config.sh
-
 TMPFILE="/tmp/innobackupex-runner.$$.tmp"
-USEROPTIONS="--user=$mysql_user --password=$mysql_pwd"
+USEROPTIONS="--user=$db_username --password=$db_password"
 
 # Checking if backup tool exists
 if [ ! -x `which innobackupex` ]; then

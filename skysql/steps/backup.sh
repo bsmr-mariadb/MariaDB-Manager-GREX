@@ -56,12 +56,6 @@ fi
 # Setting the state of the command to running
 ./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
 
-. ./mysql-config.sh
-. ./restfulapicredentials.sh
-
-export node_id=$scds_node_id
-export system_id=$scds_system_id
-
 # Making an API call to create the Backup record on the DB, defining BACKUPID
 . ./steps/backups/createbackup.sh
 

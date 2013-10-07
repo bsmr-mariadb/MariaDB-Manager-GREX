@@ -25,9 +25,7 @@
 # This script returns the current SkySQL Manager state of the current node
 #
 
-. ./restfulapicredentials.sh
-
-api_ret=`./restfulapi-call.sh "GET" "system/$scds_system_id/node/$scds_node_id" "fields=state" \
+api_ret=`./restfulapi-call.sh "GET" "system/$system_id/node/$node_id" "fields=state" \
 	| sed 's|^{"node":{||' | sed 's|}}$||'`
 
 sys_state=`echo $api_ret | awk 'BEGIN { FS=":" } /\"state\"/ {

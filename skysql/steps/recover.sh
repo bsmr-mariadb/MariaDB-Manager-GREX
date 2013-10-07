@@ -27,7 +27,6 @@
 # with an online node of the cluster.
 #
 
-. ./mysql-config.sh
 . ./remote-scripts-config.sh
 
 echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: recover"
@@ -57,15 +56,15 @@ cluster_online_ip=`./get-online-node.sh`
 if [ -n $cluster_online_ip ]; then
 	# Finding the Galera wsrep library
 	if [ -f /usr/lib/galera/libgalera_smm.so ]; then
-		mysql -u $mysql_user -p$mysql_pwd -e "SET GLOBAL wsrep_provider='/usr/lib/galera/libgalera_smm.so';"
+		mysql -u $db_username -p$db_password -e "SET GLOBAL wsrep_provider='/usr/lib/galera/libgalera_smm.so';"
 	elif [ -f /usr/lib64/galera/libgalera_smm.so ]; then
-		mysql -u $mysql_user -p$mysql_pwd -e "SET GLOBAL wsrep_provider='/usr/lib64/galera/libgalera_smm.so';"
+		mysql -u $db_username -p$db_password -e "SET GLOBAL wsrep_provider='/usr/lib64/galera/libgalera_smm.so';"
 	else
 		echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- No Galera wsrep library found."
 		exit 1
 	fi
 
-	mysql -u $mysql_user -p$mysql_pwd -e "SET GLOBAL wsrep_cluster_address='gcomm://$cluster_online_ip:4567';"
+	mysql -u $db_username -p$db_password -e "SET GLOBAL wsrep_cluster_address='gcomm://$cluster_online_ip:4567';"
 else
 	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- No active cluster to rejoin."
 	exit 1

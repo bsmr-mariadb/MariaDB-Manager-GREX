@@ -44,10 +44,13 @@ full_url="http://$api_host/restfulapi/$2"
 # Sending the request
 if [ $# -ge 3 ]; then
 	if [ $1 == "GET" ]; then
-		curl -s --request GET -H "Date:$api_auth_date" -H "Authorization:$api_auth_header" -H "Accept:application/json" $full_url?$3
+		curl -s --request GET -H "Date:$api_auth_date" -H "Authorization:$api_auth_header" \
+			-H "Accept:application/json" $full_url?$3
 	else
-		curl -s --request $1 -H "Date:$api_auth_date" -H "Authorization:$api_auth_header" -H "Accept:application/json" --data "$3" $full_url 
+		curl -s --request $1 -H "Date:$api_auth_date" -H "Authorization:$api_auth_header" \
+			-H "Accept:application/json" --data "$3" $full_url 
 	fi
 else
-        curl -s --request $1 -H "Date:$api_auth_date" -H "Authorization:$api_auth_header" -H "Accept:application/json" $full_url
+        curl -s --request $1 -H "Date:$api_auth_date" -H "Authorization:$api_auth_header" \
+		-H "Accept:application/json" $full_url
 fi

@@ -25,8 +25,6 @@
 # This script restores an incremental backup on the database
 #
 
-. ./mysql-config.sh
-
 TMPFILE="/tmp/innobackupex-runner.$$.tmp"
 
 ## Restore vars
@@ -37,7 +35,7 @@ mkdir -p $RESTOREPATH/incr
 mkdir -p $RESTOREPATH/extr
 mkdir -p $RESTOREPATH/mysql_tmp_cp
 
-USEROPTIONS="--user=$mysql_user --password=$mysql_pwd"
+USEROPTIONS="--user=$db_username --password=$db_password"
 DATAFOLDER=`cat $my_cnf_file | awk 'BEGIN { FS="=" } { if ($1 == "datadir") print $2 }'`
 
 if [ "$DATAFOLDER" == "" ] ; then
@@ -172,7 +170,7 @@ if [ ! `mysqladmin $USEROPTIONS status | awk '{print $1}'` == "Uptime:" ]; then
  exit 1
 fi
 
-mysql -u $mysql_user -p$mysql_pwd -e "SET GLOBAL wsrep_provider=none;"
+mysql $USEROPTIONS -e "SET GLOBAL wsrep_provider=none;"
 
 # Cleanup phase
 rm -fR $RESTOREPATH/mysql_tmp_cp/*

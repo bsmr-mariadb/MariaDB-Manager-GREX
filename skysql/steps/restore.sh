@@ -32,17 +32,12 @@ if [ $# -lt 1 ] ; then
     exit 1
 fi
 
-. ./mysql-config.sh
-. ./restfulapicredentials.sh
-
 echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: restore"
 echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- params: backup_id $1"
 
 # Setting the state of the command to running
 ./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
 
-export node_id=$scds_node_id
-export system_id=$scds_system_id
 export BACKUPID=$1
 
 backupfilename=`ls -1 $backups_path | grep -s Backup.$BACKUPID\$`

@@ -26,7 +26,6 @@
 # of execution
 #
 
-. ./restfulapicredentials.sh
 no_commands=0
 
 api_ret=`./restfulapi-call.sh "GET" "task" "state=running"`

@@ -25,8 +25,6 @@
 # This script restores a full backup on the database
 #
 
-. ./mysql-config.sh
-
 TMPFILE="/tmp/innobackupex-runner.$$.tmp"
 
 RESTOREPATH="/tmp"
@@ -41,7 +39,7 @@ fi
 mkdir -p $RESTOREPATH/extr
 mkdir -p $RESTOREPATH/mysql_tmp_cp
 
-USEROPTIONS="--user=$mysql_user --password=$mysql_pwd"
+USEROPTIONS="--user=$db_username --password=$db_password"
 
 # Checking if the script can access the database
 if ! `echo 'exit' | /usr/bin/mysql -s $USEROPTIONS` ; then
@@ -112,7 +110,7 @@ if [ ! `mysqladmin $USEROPTIONS status | awk '{print $1}'` == "Uptime:" ]; then
  exit 1
 fi
 
-mysql -u $mysql_user -p$mysql_pwd -e "SET GLOBAL wsrep_provider=none;"
+mysql $USEROPTIONS -e "SET GLOBAL wsrep_provider=none;"
 
 # Cleanup phase
 rm -fR $RESTOREPATH/mysql_tmp_cp/*
