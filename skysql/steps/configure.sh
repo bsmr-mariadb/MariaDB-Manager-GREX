@@ -30,7 +30,7 @@ echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: configure"
 
 # Creating MariaDB configuration file
 hostname=`uname -n`
-sed -e "s/###NODE-ADDRESS###/$hostname/" \
+sed -e "s/###NODE-ADDRESS###/$privateip/" \
 	-e "s/###REP-USERNAME###/$rep_username/" \
 	-e "s/###REP-PASSWORD###/$rep_password/" \
 	steps/conf_files/skysql-galera.cnf > /etc/my.cnf.d/skysql-galera.cnf

@@ -6,6 +6,7 @@
 %define install_path	/usr/local/sbin/
 
 BuildRoot:		%{buildroot}
+BuildArch:		noarch
 Summary: 		galera-remote-exec
 License: 		GPL
 Name: 			%{name}
@@ -14,7 +15,7 @@ Release: 		%{release}
 Source: 		%{name}-%{version}-%{release}.tar.gz
 Prefix: 		/
 Group: 			Development/Tools
-Requires:		curl
+Requires:		curl net-tools
 #BuildRequires:		
 
 %description

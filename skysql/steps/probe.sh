@@ -51,7 +51,7 @@ if [ $? == 0 ]; then
 fi
 
 # Checking if port 3306 is busy
-lsof -i -n -P | grep "TCP .*:3306 (LISTEN)"
+netstat -a | egrep -is "tcp.*(3306)|(mysql).*LISTEN"
 if [ $? == 0 ]; then
 	mysql_port_busy=true
 fi

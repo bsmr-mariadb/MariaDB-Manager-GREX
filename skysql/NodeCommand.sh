@@ -42,6 +42,25 @@ cd $scripts_dir
 echo "INFO :" `date "+%Y%m%d_%H%M%S"` "- Command request:" >> $log
 echo "INFO :" `date "+%Y%m%d_%H%M%S"` "- NodeCommand params: step_script $step_script; taskid $taskid; params $params" >> $log
 
+# Validations
+if [ "$step_script" == "" ]; then
+				echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "- Parameter value not defined: step" >> $log
+				echo "1"
+				exit 1
+fi
+
+if [ "$task_id" == "" ]; then
+				echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "- Parameter value not defined: task id" >> $log
+				echo "1"
+				exit 1
+fi
+
+if [ "$api_host" == "" ]; then
+				echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "- Parameter value not defined: api host" >> $log
+				echo "1"
+				exit 1
+fi
+
 # Getting current node system information from API
 task_json=`./restfulapi-call.sh "GET" "task/$taskid" "fields=systemid,nodeid"`
 task_fields=`echo $task_json | sed 's|^{"task":{||' | sed 's|}}$||'`
@@ -64,9 +83,11 @@ export rep_username=`echo $node_fields | awk 'BEGIN { RS=","; FS=":" } \
         { gsub("\"", "", $0); if ($1 == "repusername") print $2; }'`
 export rep_password=`echo $node_fields | awk 'BEGIN { RS=","; FS=":" } \
         { gsub("\"", "", $0); if ($1 == "reppassword") print $2; }'`
+export privateip=`echo $node_fields | awk 'BEGIN { RS=","; FS=":" } \
+        { gsub("\"", "", $0); if ($1 == "privateip") print $2; }'`
 
 # Test command
-if [ $1 == "test" ]; then
+if [ "$stepscript" == "test" ]; then
         echo 0; exit
 fi
 
