@@ -44,21 +44,21 @@ echo "INFO :" `date "+%Y%m%d_%H%M%S"` "- NodeCommand params: step_script $step_s
 
 # Validations
 if [ "$step_script" == "" ]; then
-				echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "- Parameter value not defined: step" >> $log
-				echo "1"
-				exit 1
+	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "- Parameter value not defined: step" >> $log
+	echo "1"
+	exit 1
 fi
 
-if [ "$task_id" == "" ]; then
-				echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "- Parameter value not defined: task id" >> $log
-				echo "1"
-				exit 1
+if [ "$taskid" == "" ]; then
+	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "- Parameter value not defined: task id" >> $log
+	echo "1"
+	exit 1
 fi
 
 if [ "$api_host" == "" ]; then
-				echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "- Parameter value not defined: api host" >> $log
-				echo "1"
-				exit 1
+	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "- Parameter value not defined: api host" >> $log
+	echo "1"
+	exit 1
 fi
 
 # Getting current node system information from API
