@@ -38,6 +38,8 @@ sed -e "s/###NODE-ADDRESS###/$privateip/" \
 # Setting up MariaDB users
 /etc/init.d/mysql start
 
+sleep 5
+
 mysql -u root -e "DELETE FROM mysql.user; \
 GRANT ALL PRIVILEGES ON *.* TO $rep_username@'%' IDENTIFIED BY '$rep_password';
 GRANT ALL PRIVILEGES ON *.* TO $db_username@'%' IDENTIFIED BY '$db_password';
