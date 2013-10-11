@@ -40,10 +40,10 @@ sed -e "s/###NODE-ADDRESS###/$privateip/" \
 
 sleep 5
 
-mysql -u root -e "DELETE FROM mysql.user; \
-GRANT ALL PRIVILEGES ON *.* TO $rep_username@'%' IDENTIFIED BY '$rep_password';
-GRANT ALL PRIVILEGES ON *.* TO $db_username@'%' IDENTIFIED BY '$db_password';
-GRANT ALL PRIVILEGES ON *.* TO root@'%' IDENTIFIED BY 'sky';
+mysql -u root -e "DELETE FROM mysql.user WHERE user = ''; \
+GRANT ALL PRIVILEGES ON *.* TO $rep_username@'%' IDENTIFIED BY '$rep_password'; \
+GRANT ALL PRIVILEGES ON *.* TO $db_username@'%' IDENTIFIED BY '$db_password'; \
+GRANT ALL PRIVILEGES ON *.* TO root@'%' IDENTIFIED BY 'sky' WITH GRANT OPTION; \
 FLUSH PRIVILEGES;"
 
 /etc/init.d/mysql stop
