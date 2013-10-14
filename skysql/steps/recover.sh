@@ -31,22 +31,6 @@
 
 echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: recover"
 
-no_retries=$commands_wait_retries
-while [ $no_retries -gt 0 ]
-do
-        cur_commands=`./get-current-commands.sh`
-        if [[ "$cur_commands" == "0" ]]; then
-                break
-        fi
-        sleep 1
-        no_retries=$((no_retries - 1))
-done
-
-if [ $no_retries -eq 0 ]; then
-        echo "ERROR : " `date "+%Y%m%d_%H%M%S"` "-- Command aborted: system busy with other commands"
-        exit 1
-fi
-
 # Setting the state of the command to running
 ./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
 

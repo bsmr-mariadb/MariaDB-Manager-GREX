@@ -56,6 +56,8 @@ fi
 # Setting the state of the command to running
 ./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
 
+. ./mysql-config.sh
+
 # Making an API call to create the Backup record on the DB, defining BACKUPID
 . ./steps/backups/createbackup.sh
 
