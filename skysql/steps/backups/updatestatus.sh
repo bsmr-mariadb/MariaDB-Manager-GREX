@@ -46,4 +46,4 @@ done
 
 request_uri="system/$scds_system_id/backup/$backupid"
 
-api_response=`/usr/local/sbin/skysql/restfulapi-call.sh "PUT" $request_uri $data`
+api_response=`/usr/local/sbin/skysql/restfulapi-call.sh "PUT" "$request_uri" "$data"`

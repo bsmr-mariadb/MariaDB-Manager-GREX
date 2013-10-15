@@ -31,9 +31,9 @@ TMPFILE="/tmp/innobackupex-runner.$$.tmp"
 RESTOREPATH="/tmp"
 
 # Creates temporary directories if they do not exist
-mkdir -p $RESTOREPATH/incr
-mkdir -p $RESTOREPATH/extr
-mkdir -p $RESTOREPATH/mysql_tmp_cp
+mkdir -p "$RESTOREPATH/incr"
+mkdir -p "$RESTOREPATH/extr"
+mkdir -p "$RESTOREPATH/mysql_tmp_cp"
 
 USEROPTIONS="--user=$db_username --password=$db_password"
 DATAFOLDER=`cat $my_cnf_file | awk 'BEGIN { FS="=" } { if ($1 == "datadir") print $2 }'`
@@ -63,12 +63,12 @@ prepareapply() {
 
 	# Extracting previouly retrieved base fullbackup
 	cur=`pwd`
-	cd $RESTOREPATH/extr
-	tar -xivf $backups_path/$bkpname
-	cd $cur
+	cd "$RESTOREPATH/extr"
+	tar -xivf "$backups_path/$bkpname"
+	cd "$cur"
 
 	# Preparing base backup
-	innobackupex $USEROPTIONS --defaults-file $my_cnf_file --apply-log --redo-only $RESTOREPATH/extr &> $TMPFILE
+	innobackupex $USEROPTIONS --defaults-file "$my_cnf_file" --apply-log --redo-only "$RESTOREPATH/extr" &> $TMPFILE
 	if [ -z "`tail -1 $TMPFILE | grep 'completed OK!'`" ] ; then
 		echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "Restore failed (stage 'preparing the backup'):"; echo
 		echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
@@ -80,45 +80,45 @@ prepareapply() {
 	fi
 	
 	# Applying incremental backups
-	INCREMENTALDIR=$RESTOREPATH/incr
-	rm -fR $INCREMENTALDIR/*
+	INCREMENTALDIR="$RESTOREPATH/incr"
+	rm -fR "$INCREMENTALDIR/*"
 	let "index = $index - 1"
 	while [ "$index" -ge 0 ]
 	do
 		bkpname=${arrbkp[index]}
-		xbstream -x < $backups_path/$bkpname -C $INCREMENTALDIR
-		innobackupex --apply-log --defaults-file=$my_cnf_file --use-memory=1G $USEROPTIONS --incremental-dir=$INCREMENTALDIR $RESTOREPATH/extr
-		rm -fR $INCREMENTALDIR/*
+		xbstream -x < $backups_path/$bkpname -C "$INCREMENTALDIR"
+		innobackupex --apply-log --defaults-file="$my_cnf_file" --use-memory=1G $USEROPTIONS --incremental-dir="$INCREMENTALDIR" "$RESTOREPATH/extr"
+		rm -fR "$INCREMENTALDIR/*"
 		let "index = $index - 1"
 	done
 
 	# Prepare the base backup after applying incremental backups
-	innobackupex $USEROPTIONS --apply-log --redo-only $RESTOREPATH/extr &> $TMPFILE
+	innobackupex $USEROPTIONS --apply-log --redo-only "$RESTOREPATH/extr" &> $TMPFILE
 }
 
 
 # getbackups(): downloads all the backups and stores them into an array, last pos == base fullbackup 
 getbackups() {
 	index=0
-	BACKUPNAME=`ls -1 $backups_path | grep -s Backup.$BACKUPID\$`
+	BACKUPNAME=`ls -1 "$backups_path" | grep -s Backup.$BACKUPID\$`
 
-	while [[ ! $BACKUPNAME == FullBackup* ]]; do
-		arrbkp[index]=$BACKUPNAME     
+	while [[ ! "$BACKUPNAME" == "FullBackup*" ]]; do
+		arrbkp[index]="$BACKUPNAME" 
 		. ./steps/backups/getbasebackup.sh
-		export BACKUPID=$BASEBACKUPID
-		BACKUPNAME=`ls -1 $backups_path | grep -s Backup.$BACKUPID\$`
+		export BACKUPID="$BASEBACKUPID"
+		BACKUPNAME=`ls -1 "$backups_path" | grep -s Backup.$BACKUPID\$`
 		let "index = $index + 1"
 	done
 
-	arrbkp[index]=$BACKUPNAME
+	arrbkp[index]="$BACKUPNAME"
    
 	prepareapply -a arrbkp[@]
 }
 
 # Cleaning potential hung files from previous aborted restore attempt
-rm -fR $RESTOREPATH/mysql_tmp_cp/*
-rm -fR $RESTOREPATH/extr/*
-rm -fR $RESTOREPATH/incr/*
+rm -fR "$RESTOREPATH/mysql_tmp_cp/*"
+rm -fR "$RESTOREPATH/extr/*"
+rm -fR "$RESTOREPATH/incr/*"
 
 getbackups
 
@@ -141,13 +141,13 @@ if [[ `mysqladmin $USEROPTIONS status | awk '{print $1}'` == "Uptime:" ]]; then
 fi
 
 # Cleaning the data folder
-mv $DATAFOLDER/* $RESTOREPATH/mysql_tmp_cp/
+mv "$DATAFOLDER/*" "$RESTOREPATH/mysql_tmp_cp/"
 
 # Restore by copyback of the backup folder into data folder
-innobackupex $USEROPTIONS --defaults-file $my_cnf_file --copy-back $RESTOREPATH/extr/ &> $TMPFILE
+innobackupex $USEROPTIONS --defaults-file "$my_cnf_file" --copy-back "$RESTOREPATH/extr/" &> $TMPFILE
 
 # Changing mysql data folder ownership back to mysql
-chown -R mysql:mysql $DATAFOLDER
+chown -R mysql:mysql "$DATAFOLDER"
 
 if [ -z "`tail -1 $TMPFILE | grep 'completed OK!'`" ] ; then
  echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Restore failed - stage 'copyback backup':"; 
@@ -171,10 +171,14 @@ if [ ! `mysqladmin $USEROPTIONS status | awk '{print $1}'` == "Uptime:" ]; then
 fi
 
 mysql $USEROPTIONS -e "SET GLOBAL wsrep_provider=none;"
+if [ $? != 0 ]; then
+ echo Unable to set global wsrep_provider
+ exit 1
+fi
 
 # Cleanup phase
-rm -fR $RESTOREPATH/mysql_tmp_cp/*
-rm -fR $RESTOREPATH/extr/*
-rm -fR $RESTOREPATH/incr/*
+rm -fR "$RESTOREPATH/mysql_tmp_cp/*"
+rm -fR "$RESTOREPATH/extr/*"
+rm -fR "$RESTOREPATH/incr/*"
 
 exit 0

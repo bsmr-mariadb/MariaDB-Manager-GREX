@@ -33,6 +33,12 @@ echo `date "+%Y%m%d_%H%M%S"` "-- Command start: stop"
 ./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
 
 /etc/init.d/mysql stop
+stop_status=$?
+if [ $stop_status != 0 ]; then
+	echo `date "+%Y%m%d_%H%M%S"` mysql stop returned failure
+	./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=MySQL stopcommand failed" > /dev/null
+	exit $stop_status
+fi
 
 no_retries=$state_wait_retries
 while [ "$no_retries" -gt 0 ]

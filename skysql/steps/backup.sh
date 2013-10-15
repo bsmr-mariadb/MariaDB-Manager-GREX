@@ -34,6 +34,7 @@ echo `date "+%Y%m%d_%H%M%S"` "-- params: backup_type $1; base_backup_id $2"
 # Parameter validation
 if [ "$1" == "" ] ; then
 	echo `date "+%Y%m%d_%H%M%S"` "-- $0 invoked with no parameters"
+	./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=Missing parameters, backup should be called with a backup type and an optional id"
 	exit 1
 fi
 
@@ -66,11 +67,13 @@ fi
 # Setting the backup state to 'scheduled'
 ./steps/backups/updatestatus.sh "$BACKUPID" "scheduled"
 
-if [ $level -eq 1 ] ; then
+if [ "$level" -eq 1 ] ; then
 	./steps/backups/fullbackup.sh > /tmp/backup.log.$$
+	bkstatus=$?
 	backupfilename="FullBackup.$BACKUPID"
-elif [ $level -eq 2 ] ; then
+elif [ "$level" -eq 2 ] ; then
 	./steps/backups/incrbackup.sh > /tmp/backup.log.$$
+	bkstatus=$?
 	backupfilename="IncrBackup.$BACKUPID"
 else
         echo `date "+%Y%m%d_%H%M%S"` "-- level parameter must have a value of 1 (full) or 2 (incremental)"
@@ -78,9 +81,8 @@ else
         exit 1
 fi
 
-bkstatus=$?
 binlogpos=`grep binlog /tmp/backup.log.$$ | awk '{ printf("%s%s\n", $6, $8); }' | sed -e s/\'//g`
-size=`du -k $backups_path/$backupfilename | awk '{ print $1 }'`
+size=`du -k "$backups_path/$backupfilename" | awk '{ print $1 }'`
 
 if [ "$bkstatus" -eq 0 ] ; then # Backup successful
 	# Updating backup state (completed) and other data on the DB
@@ -90,7 +92,7 @@ if [ "$bkstatus" -eq 0 ] ; then # Backup successful
 			storage="$backups_path/$backupfilename" \
 			binlog="$binlogpos" \
 			log="$backups_path/Log.$BACKUPID"
-	elif [ $level -eq 2 ] ; then
+	elif [ "$level" -eq 2 ] ; then
 		./steps/backups/updatestatus.sh "$BACKUPID" "done" \
 			size="$size" \
                         log="$backups_path/Log.$BACKUPID" \
@@ -100,7 +102,7 @@ if [ "$bkstatus" -eq 0 ] ; then # Backup successful
 	fi
 
 	# Putting the log in place
-	mv /tmp/backup.log.$$ $backups_path/Log.$BACKUPID
+	mv /tmp/backup.log.$$ "$backups_path/Log.$BACKUPID"
 else # Backup unsuccessful
 	# Updating backup state (error)
 	./steps/backups/updatestatus.sh $BACKUPID "error"

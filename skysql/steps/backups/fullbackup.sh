@@ -26,7 +26,7 @@
 #
 
 # Creating the backup directory if it does not exist
-mkdir -p $backups_path
+mkdir -p "$backups_path"
 
 TMPFILE="/tmp/innobackupex-runner.$$.tmp"
 USEROPTIONS="--user=$db_username --password=$db_password"
@@ -44,7 +44,7 @@ if ! `echo 'exit' | /usr/bin/mysql -s $USEROPTIONS` ; then
 fi
 
 # Generating the backup file
-innobackupex $USEROPTIONS --defaults-file=$my_cnf_file --stream=tar ./ > $backups_path/FullBackup.$BACKUPID 2> $TMPFILE
+innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --stream=tar ./ > "$backups_path/FullBackup.$BACKUPID" 2> $TMPFILE
 
 if [ -z "`tail -1 $TMPFILE | grep 'completed OK!'`" ] ; then
 	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- $INNOBACKUPEX failed:"; echo

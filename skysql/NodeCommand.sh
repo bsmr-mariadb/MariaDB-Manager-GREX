@@ -58,7 +58,7 @@ fi
 
 if [ "$api_host" == "" ]; then
 	logger -p user.error -t MariaDB-Enterprise-Remote \
-			"Task: $taskid Parameter value not defined: api host"
+			"Task: $taskid Parameter value not defined: api_host"
 	echo "1"
 	exit 1
 fi

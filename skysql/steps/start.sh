@@ -38,8 +38,16 @@ cluster_online_ip=`./get-online-node.sh`
 
 if [ -n "$cluster_online_ip" ]; then
         /etc/init.d/mysql start --wsrep-cluster-address=gcomm://$cluster_online_ip:4567
+	start_status=$?
 else # Starting a new cluster
 	/etc/init.d/mysql start --wsrep-cluster-address=gcomm://
+	start_status=$?
+fi
+
+if [ $start_status != 0 ]; then
+	echo `date "+%Y%m%d_%H%M%S"` mysql start returned failure
+	./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=mysql start command failed" > /dev/null
+	exit $stop_status
 fi
 
 no_retries=$state_wait_retries

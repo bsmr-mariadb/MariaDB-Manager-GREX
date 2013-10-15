@@ -34,6 +34,12 @@ echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: isolate"
 ./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
 
 mysql -u $db_username -p$db_password -e "SET GLOBAL wsrep_provider=none;"
+mysql_status=$?
+if [ $mysql_status != 0 ]; then
+	./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=Failed to set global wsrep_provider" > /dev/null
+	echo Unable to set global variable wsrep_provider
+	exit $mysql_status
+fi
 
 no_retries=$state_wait_retries
 while [ $no_retries -gt 0 ]

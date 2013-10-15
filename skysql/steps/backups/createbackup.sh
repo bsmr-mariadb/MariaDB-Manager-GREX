@@ -39,7 +39,7 @@ if [ "$level" = "" ] ; then
         echo '$0: Expected to be called with level variable set'
         exit 1
 fi
-if [ $level -eq 2 ] && [ "$BASEBACKUPID" = "" ] ; then
+if [ "$level" -eq 2 ] && [ "$BASEBACKUPID" = "" ] ; then
 	echo '$0: Expected to be called with BASEBACKUPID variable set when level is 2 (incremental)'
 	exit 1
 fi	
@@ -47,13 +47,13 @@ fi
 # Building the data parameter with the API call-specific arguments
 start_date=`date +"%Y-%m-%d %H:%M:%S"`
 data="systemid=$system_id&nodeid=$node_id&level=$level&started=$start_date"
-if [ $level -eq 2 ] ; then
+if [ "$level" -eq 2 ] ; then
         data="$data&parentid=$BASEBACKUPID"
 fi
 
 request_uri="system/$system_id/backup"
 
-api_response=`./restfulapi-call.sh "POST" $request_uri "$data"`
+api_response=`./restfulapi-call.sh "POST" "$request_uri" "$data"`
 
 # Parsing API response and setting BACKUPID for the invoking script
 export BACKUPID=`echo $api_response | sed 's|[{}]||g' | 
