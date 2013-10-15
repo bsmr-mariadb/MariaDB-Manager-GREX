@@ -40,7 +40,7 @@ if [ $? == 0 ]; then
 	dev=`ip route get "$api_host" | awk '$2 == "dev" { print $3 } $4 == "dev" { print $5 }'`
 	if [ x"$dev" == "x" ]; then
 		iptables -A INPUT -p tcp -m tcp --dport 4567 -j ACCEPT
-		logger -p user.warning -t MariaDB-Enterprise-Remote \
+		logger -p user.warning -t MariaDB-Manager-Remote \
 			"Unable to determine network device - opening Galera port to the world"
 	else
 		address=`ip addr show $dev | awk '$1 == "inet" { print $2 }'`
@@ -49,7 +49,7 @@ if [ $? == 0 ]; then
 		service iptables save
 	fi
 
-	logger -p user.info -t MariaDB-Enterprise-Remote "Updated iptables rules"
+	logger -p user.info -t MariaDB-Manager-Remote "Updated iptables rules"
 
 fi
 
@@ -60,14 +60,14 @@ if [ -d /etc/selinux ]; then
 		> /tmp/selinux_config \
 		&& mv /tmp/selinux_config /etc/selinux/config
 
-	logger -p user.info -t MariaDB-Enterprise-Remote "Disabled selinux"
+	logger -p user.info -t MariaDB-Manager-Remote "Disabled selinux"
 fi
 
 # Check for AppArmor and enable mysql
 if [ -d /etc/apparmor.d ]; then
 	ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.s/disable/usr.sbin.mysqld
 	service apparmor restart
-	logger -p user.info -t MariaDB-Enterprise-Remote "Disabled MySQL in AppAmor"
+	logger -p user.info -t MariaDB-Manager-Remote "Disabled MySQL in AppAmor"
 fi
 
 exit 0

@@ -89,7 +89,7 @@ case $curl_status in
 	msg="curl failed with exit code $curl_status"
 esac
 
-logger -p user.error -t MariaDB-Enterprise-Task "restfulapi-call: $full_url failed, $msg"
+logger -p user.error -t MariaDB-Manager-Task "restfulapi-call: $full_url failed, $msg"
 fi
 
 exit $curl_status

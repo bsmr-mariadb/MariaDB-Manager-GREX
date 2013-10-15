@@ -53,6 +53,6 @@ FLUSH PRIVILEGES;"
 status=$?
 
 if [ $status != 0] ; then
-	logger -p user.error -t MariaDB-Enterprise-Remote "Failed to set the node state to provisioned"
+	logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to provisioned"
 fi
 exit $status
