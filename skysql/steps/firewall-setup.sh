@@ -46,6 +46,7 @@ if [ $? == 0 ]; then
 		address=`ip addr show $dev | awk '$1 == "inet" { print $2 }'`
 
 		iptables -A INPUT -p tcp -m tcp --dport 4567 -s "$address" -j ACCEPT
+		service iptables save
 	fi
 
 	logger -p user.info -t MariaDB-Enterprise-Remote "Updated iptables rules"
