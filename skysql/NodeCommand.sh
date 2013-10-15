@@ -98,9 +98,9 @@ fullpath="$scripts_dir/steps/$step_script.sh $params"
 sh $fullpath            > /tmp/remote.$$.log 2>&1
 return_status=$?
 if [ $return_status == 0 ]; then
-	$pri="user.info"
+	pri="user.info"
 else
-	$pri="user.error"
+	pri="user.error"
 fi
 logger -p $pri -t MariaDB-Enterprise-Task -f /tmp/remote.$$.log
 rm -f /tmp/remote.$$.log
