@@ -26,7 +26,7 @@
 # command execution.
 #
 
-echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: configure"
+echo `date "+%Y%m%d_%H%M%S"` "-- Command start: configure"
 
 # Creating MariaDB configuration file
 hostname=`uname -n`
@@ -50,3 +50,9 @@ FLUSH PRIVILEGES;"
 
 # Updating node state
 ./restfulapi-call.sh "PUT" "system/$system_id/node/$node_id" "state=provisioned"
+status=$?
+
+if [ $status != 0] ; then
+	logger -p user.error -t MariaDB-Enterprise-Remote "Failed to set the node state to provisioned"
+fi
+exit $status

@@ -28,7 +28,7 @@
 
 . ./remote-scripts-config.sh
 
-echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: start"
+echo `date "+%Y%m%d_%H%M%S"` "-- Command start: start"
 
 # Setting the state of the command to running
 ./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
@@ -43,7 +43,7 @@ else # Starting a new cluster
 fi
 
 no_retries=$state_wait_retries
-while [ $no_retries -gt 0 ]
+while [ "$no_retries" -gt 0 ]
 do
         sleep 1
         node_state=`./get-node-state.sh`
@@ -53,6 +53,7 @@ do
         fi
         no_retries=$((no_retries - 1))
 done
-echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Command finished with an error: node state not OK"
+./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=Timeout waiting for node to start"
+echo `date "+%Y%m%d_%H%M%S"` "-- Command finished with an error: node state not OK"
 exit 1
 

@@ -28,19 +28,19 @@
 # $1: Backup ID
 
 if [ $# -lt 1 ] ; then
-    echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Usage: $0 '<backup id>'"
+    echo `date "+%Y%m%d_%H%M%S"` "-- Usage: $0 '<backup id>'"
     exit 1
 fi
 
-echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: restore"
-echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- params: backup_id $1"
+echo `date "+%Y%m%d_%H%M%S"` "-- Command start: restore"
+echo `date "+%Y%m%d_%H%M%S"` "-- params: backup_id $1"
 
 # Setting the state of the command to running
 ./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
 
 . ./mysql-config.sh
 
-export BACKUPID=$1
+export BACKUPID="$1"
 
 backupfilename=`ls -1 $backups_path | grep -s Backup.$BACKUPID\$`
 if [[ "$backupfilename" == Full* ]] ; then

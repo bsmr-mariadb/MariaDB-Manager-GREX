@@ -29,7 +29,7 @@
 
 . ./remote-scripts-config.sh
 
-echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: recover"
+echo `date "+%Y%m%d_%H%M%S"` "-- Command start: recover"
 
 # Setting the state of the command to running
 ./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
@@ -45,12 +45,14 @@ if [ -n $cluster_online_ip ]; then
 		mysql -u $db_username -p$db_password -e "SET GLOBAL wsrep_provider='/usr/lib64/galera/libgalera_smm.so';"
 	else
 		echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- No Galera wsrep library found."
+		./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=Failed to find Galera wsrep library"
 		exit 1
 	fi
 
 	mysql -u $db_username -p$db_password -e "SET GLOBAL wsrep_cluster_address='gcomm://$cluster_online_ip:4567';"
 else
 	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- No active cluster to rejoin."
+	./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=No active cluster to join"
 	exit 1
 fi
 
@@ -66,5 +68,6 @@ do
         no_retries=$((no_retries - 1))
 done
 echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Command finished with an error: node state not OK"
+./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=Timeout waitign for noe to join the cluster"
 exit 1
 

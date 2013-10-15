@@ -28,12 +28,12 @@
 # $1: Backup type ("Full" or "Incremental")
 # $2: Base BackupID (only required if $1 = "Incremental)
 
-echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: backup"
-echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- params: backup_type $1; base_backup_id $2"
+echo `date "+%Y%m%d_%H%M%S"` "-- Command start: backup"
+echo `date "+%Y%m%d_%H%M%S"` "-- params: backup_type $1; base_backup_id $2"
 
 # Parameter validation
 if [ "$1" == "" ] ; then
-	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- $0 invoked with no parameters"
+	echo `date "+%Y%m%d_%H%M%S"` "-- $0 invoked with no parameters"
 	exit 1
 fi
 
@@ -44,12 +44,14 @@ elif [[ "$1" == Incremental* ]] ; then
 	if [ $# -ge 2 ]; then
 		export BASEBACKUPID=$2
 	else
-		echo "ERROR:" `date "+%Y%m%d_%H%M%S"` "if level is 2 (incremental) <basebackupid> is required"
+		echo `date "+%Y%m%d_%H%M%S"` "if level is 2 (incremental) <basebackupid> is required"
                 echo 'Usage: $0 <system id> <node id> <level> [<basebackupid>]'
+		./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=Missing backup ID for incremental backup"
                 exit 1
 	fi
 else
-	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Invalid parameters"
+	echo `date "+%Y%m%d_%H%M%S"` "-- Invalid parameters"
+	./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=Invalid parameters for backup step"
 	exit 1
 fi
 
@@ -62,7 +64,7 @@ fi
 . ./steps/backups/createbackup.sh
 
 # Setting the backup state to 'scheduled'
-./steps/backups/updatestatus.sh $BACKUPID "scheduled"
+./steps/backups/updatestatus.sh "$BACKUPID" "scheduled"
 
 if [ $level -eq 1 ] ; then
 	./steps/backups/fullbackup.sh > /tmp/backup.log.$$
@@ -71,7 +73,8 @@ elif [ $level -eq 2 ] ; then
 	./steps/backups/incrbackup.sh > /tmp/backup.log.$$
 	backupfilename="IncrBackup.$BACKUPID"
 else
-        echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- level parameter must have a value of 1 (full) ou 2 (incremental)"
+        echo `date "+%Y%m%d_%H%M%S"` "-- level parameter must have a value of 1 (full) or 2 (incremental)"
+	./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=Invalid backup level"
         exit 1
 fi
 
@@ -79,15 +82,17 @@ bkstatus=$?
 binlogpos=`grep binlog /tmp/backup.log.$$ | awk '{ printf("%s%s\n", $6, $8); }' | sed -e s/\'//g`
 size=`du -k $backups_path/$backupfilename | awk '{ print $1 }'`
 
-if [ $bkstatus -eq 0 ] ; then # Backup successful
+if [ "$bkstatus" -eq 0 ] ; then # Backup successful
 	# Updating backup state (completed) and other data on the DB
-	if [ $level -eq 1 ] ; then
-		./steps/backups/updatestatus.sh $BACKUPID "done" size=$size \
+	if [ "$level" -eq 1 ] ; then
+		./steps/backups/updatestatus.sh "$BACKUPID" "done" \
+			size="$size" \
 			storage="$backups_path/$backupfilename" \
 			binlog="$binlogpos" \
 			log="$backups_path/Log.$BACKUPID"
 	elif [ $level -eq 2 ] ; then
-		./steps/backups/updatestatus.sh $BACKUPID "done" size=$size \
+		./steps/backups/updatestatus.sh "$BACKUPID" "done" \
+			size="$size" \
                         log="$backups_path/Log.$BACKUPID" \
 			parent="$BASEBACKUPID" \
                         storage="$backups_path/$backupfilename" \
@@ -99,7 +104,7 @@ if [ $bkstatus -eq 0 ] ; then # Backup successful
 else # Backup unsuccessful
 	# Updating backup state (error)
 	./steps/backups/updatestatus.sh $BACKUPID "error"
-	echo "ERROR:" `date "+%Y%m%d_%H%M%S"` "-- Start of failed backup log"
+	echo `date "+%Y%m%d_%H%M%S"` "-- Start of failed backup log"
 	cat /tmp/backup.log.$$
 	echo End of failed backup log
 	rm -f /tmp/backup.log.$$

@@ -25,6 +25,7 @@
 # This script installs the necessary MariaDB/Galera packages.
 #
 
-echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: install-packages"
+echo "Command start: install-packages"
 
 yum -y install mariadb-galera-skysql
+exit $?

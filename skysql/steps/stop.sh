@@ -27,7 +27,7 @@
 
 . ./remote-scripts-config.sh
 
-echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: stop"
+echo `date "+%Y%m%d_%H%M%S"` "-- Command start: stop"
 
 # Setting the state of the command to running
 ./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
@@ -35,16 +35,16 @@ echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: stop"
 /etc/init.d/mysql stop
 
 no_retries=$state_wait_retries
-while [ $no_retries -gt 0 ]
+while [ "$no_retries" -gt 0 ]
 do
         sleep 1
         node_state=`./get-node-state.sh`
         if [[ "$node_state" == "down" ]]; then
-                echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command finished successfully"
+                echo `date "+%Y%m%d_%H%M%S"` "-- Command finished successfully"
                 exit 0
         fi
         no_retries=$((no_retries - 1))
 done
-echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Command finished with an error: node state not OK"
+echo `date "+%Y%m%d_%H%M%S"` "-- Command finished with an error: node state not OK"
 exit 1
 
