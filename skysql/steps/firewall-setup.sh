@@ -31,23 +31,32 @@ echo "Command start: firewall-setup"
 # Check if the iptables command is avialable
 which iptables > /dev/null 2>&1
 if [ $? == 0 ]; then
-	iptables -A INPUT -p tcp -m tcp --dport 3306 -j ACCEPT
 
-	# Only open the Galera poer 4567 to the network that is used
-	# to communicate with the api_host - this is likely to be the
-	# private network used for the Galera nodes to communicate
+	# Only open the Galera ports 4444, 4567, 4568 to the network
+	# that are used to communicate with the api_host - this is likely
+	# to be the private network used for the Galera nodes to communicate
+	#
+	# Open port 3306 to all networks as we do not know where clients
+	# will connect from
 
 	dev=`ip route get "$api_host" | awk '$2 == "dev" { print $3 } $4 == "dev" { print $5 }'`
 	if [ x"$dev" == "x" ]; then
 		iptables -A INPUT -p tcp -m tcp --dport 4567 -j ACCEPT
+		iptables -A INPUT -p tcp -m tcp --dport 4568 -j ACCEPT
+		iptables -A INPUT -p tcp -m tcp --dport 4444 -j ACCEPT
+		iptables -A INPUT -p tcp -m tcp --dport 3306 -j ACCEPT
 		logger -p user.warning -t MariaDB-Manager-Remote \
 			"Unable to determine network device - opening Galera port to the world"
 	else
-		address=`ip addr show $dev | awk '$1 == "inet" { print $2 }'`
+		address=`ip addr show "$dev" | awk '$1 == "inet" { print $2 }'`
 
-		iptables -A INPUT -p tcp -m tcp --dport 4567 -s "$address" -j ACCEPT
-		service iptables save
+		iptables -A INPUT -i "$dev" -p tcp -m tcp --dport 4567 -s "$address" -j ACCEPT
+		iptables -A INPUT -i "$dev" -p tcp -m tcp --dport 4568 -s "$address" -j ACCEPT
+		iptables -A INPUT -i "$dev" -p tcp -m tcp --dport 4444 -s "$address" -j ACCEPT
+		iptables -A INPUT -i "$dev" -p tcp -m tcp --dport 3306 -j ACCEPT
 	fi
+	service iptables save
+	service iptables restart
 
 	logger -p user.info -t MariaDB-Manager-Remote "Updated iptables rules"
 
@@ -65,7 +74,7 @@ fi
 
 # Check for AppArmor and enable mysql
 if [ -d /etc/apparmor.d ]; then
-	ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.s/disable/usr.sbin.mysqld
+	ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/usr.sbin.mysqld
 	service apparmor restart
 	logger -p user.info -t MariaDB-Manager-Remote "Disabled MySQL in AppAmor"
 fi
