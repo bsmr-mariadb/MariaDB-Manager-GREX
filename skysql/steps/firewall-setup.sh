@@ -41,23 +41,23 @@ if [ $? == 0 ]; then
 
 	dev=`ip route get "$api_host" | awk '$2 == "dev" { print $3 } $4 == "dev" { print $5 }'`
 	if [ x"$dev" == "x" ]; then
-		iptables -A INPUT -p tcp -m tcp --dport 4567 -j ACCEPT
-		iptables -A INPUT -p tcp -m tcp --dport 4568 -j ACCEPT
-		iptables -A INPUT -p tcp -m tcp --dport 4444 -j ACCEPT
-		iptables -A INPUT -p tcp -m tcp --dport 3306 -j ACCEPT
-		iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-		iptables -A INPUT -p tcp --dport 3306 -j ACCEPT -m state --state NEW
+		iptables -I INPUT -p tcp -m tcp --dport 4567 -j ACCEPT
+		iptables -I INPUT -p tcp -m tcp --dport 4568 -j ACCEPT
+		iptables -I INPUT -p tcp -m tcp --dport 4444 -j ACCEPT
+		iptables -I INPUT -p tcp -m tcp --dport 3306 -j ACCEPT
+		iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+		iptables -I INPUT -p tcp --dport 3306 -j ACCEPT -m state --state NEW
 		logger -p user.warning -t MariaDB-Manager-Remote \
 			"Unable to determine network device - opening Galera port to the world"
 	else
 		address=`ip addr show "$dev" | awk '$1 == "inet" { print $2 }'`
 
-		iptables -A INPUT -i "$dev" -p tcp -m tcp --dport 4567 -s "$address" -j ACCEPT
-		iptables -A INPUT -i "$dev" -p tcp -m tcp --dport 4568 -s "$address" -j ACCEPT
-		iptables -A INPUT -i "$dev" -p tcp -m tcp --dport 4444 -s "$address" -j ACCEPT
-		iptables -A INPUT -i "$dev" -p tcp -m tcp --dport 3306 -j ACCEPT
-		iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
-		iptables -A INPUT -p tcp --dport 3306 -j ACCEPT -m state --state NEW
+		iptables -I INPUT -i "$dev" -p tcp -m tcp --dport 4567 -s "$address" -j ACCEPT
+		iptables -I INPUT -i "$dev" -p tcp -m tcp --dport 4568 -s "$address" -j ACCEPT
+		iptables -I INPUT -i "$dev" -p tcp -m tcp --dport 4444 -s "$address" -j ACCEPT
+		iptables -I INPUT -i "$dev" -p tcp -m tcp --dport 3306 -j ACCEPT
+		iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+		iptables -I INPUT -p tcp --dport 3306 -j ACCEPT -m state --state NEW
 	fi
 	service iptables save
 	service iptables restart
