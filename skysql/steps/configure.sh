@@ -52,7 +52,7 @@ FLUSH PRIVILEGES;"
 ./restfulapi-call.sh "PUT" "system/$system_id/node/$node_id" "state=provisioned"
 status=$?
 
-if [ $status != 0] ; then
+if [ $status != 0 ] ; then
 	logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to provisioned"
 fi
 exit $status

@@ -45,6 +45,8 @@ if [ $? == 0 ]; then
 		iptables -A INPUT -p tcp -m tcp --dport 4568 -j ACCEPT
 		iptables -A INPUT -p tcp -m tcp --dport 4444 -j ACCEPT
 		iptables -A INPUT -p tcp -m tcp --dport 3306 -j ACCEPT
+		iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+		iptables -A INPUT -p tcp --dport 3306 -j ACCEPT -m state --state NEW
 		logger -p user.warning -t MariaDB-Manager-Remote \
 			"Unable to determine network device - opening Galera port to the world"
 	else
@@ -54,6 +56,8 @@ if [ $? == 0 ]; then
 		iptables -A INPUT -i "$dev" -p tcp -m tcp --dport 4568 -s "$address" -j ACCEPT
 		iptables -A INPUT -i "$dev" -p tcp -m tcp --dport 4444 -s "$address" -j ACCEPT
 		iptables -A INPUT -i "$dev" -p tcp -m tcp --dport 3306 -j ACCEPT
+		iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+		iptables -A INPUT -p tcp --dport 3306 -j ACCEPT -m state --state NEW
 	fi
 	service iptables save
 	service iptables restart
