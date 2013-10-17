@@ -50,17 +50,18 @@ if [ $? == 0 ]; then
 		logger -p user.warning -t MariaDB-Manager-Remote \
 			"Unable to determine network device - opening Galera port to the world"
 	else
-		address=`ip addr show "$dev" | awk '$1 == "inet" { print $2 }'`
-
-		iptables -I INPUT -i "$dev" -p tcp -m tcp --dport 4567 -s "$address" -j ACCEPT
-		iptables -I INPUT -i "$dev" -p tcp -m tcp --dport 4568 -s "$address" -j ACCEPT
-		iptables -I INPUT -i "$dev" -p tcp -m tcp --dport 4444 -s "$address" -j ACCEPT
+		iptables -I INPUT -i "$dev" -p tcp -m tcp --dport 4567 -j ACCEPT
+		iptables -I INPUT -i "$dev" -p tcp -m tcp --dport 4568 -j ACCEPT
+		iptables -I INPUT -i "$dev" -p tcp -m tcp --dport 4444 -j ACCEPT
 		iptables -I INPUT -i "$dev" -p tcp -m tcp --dport 3306 -j ACCEPT
 		iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 		iptables -I INPUT -p tcp --dport 3306 -j ACCEPT -m state --state NEW
 	fi
 	service iptables save
-	service iptables restart
+	# Restart iptables if it is already running
+	if service iptables status > /dev/null ; then
+		service iptables restart
+	fi
 
 	logger -p user.info -t MariaDB-Manager-Remote "Updated iptables rules"
 
