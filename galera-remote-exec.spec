@@ -7,7 +7,7 @@
 
 BuildRoot:		%{buildroot}
 BuildArch:		noarch
-Summary: 		galera-remote-exec
+Summary: 		MariaDB Manager Database Node Agent
 License: 		GPL
 Name: 			%{name}
 Version: 		%{version}
@@ -19,7 +19,10 @@ Requires:		curl net-tools percona-xtrabackup
 #BuildRequires:		
 
 %description
-galera-remote-exec
+MariaDB Manager is a tool to manage and monitor a set of MariaDB
+servers using the Galera multi-master replication form Codership.
+As part of the management infrastructure a set of agent scripts are
+installed on each of the database nodes.
 
 %prep
 
