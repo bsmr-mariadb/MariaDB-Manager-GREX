@@ -83,7 +83,7 @@ if [[ "$mysql_status" == "Uptime:" ]]; then
 fi
 
 # Cleaning the data folder
-mv "$DATAFOLDER/*" "$RESTOREPATH/mysql_tmp_cp/"
+mv $DATAFOLDER/* $RESTOREPATH/mysql_tmp_cp/
 
 # Restore by copyback of the backup folder into data folder
 innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --copy-back "$RESTOREPATH/extr/" &> $TMPFILE

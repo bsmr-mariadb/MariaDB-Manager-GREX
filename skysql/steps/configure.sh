@@ -48,6 +48,26 @@ FLUSH PRIVILEGES;"
 
 /etc/init.d/mysql stop
 
+# Configuring datadir in my.cnf (using hardcoded dir /var/lib/mysql)
+my_cnf_path=$(whereis my.cnf | awk 'END { if (NF >= 2) print $2; }')
+if [[ my_cnf_path != "" ]]; then
+        sed -e "s|export my_cnf_file=.*|export my_cnf_file=\"$my_cnf_path\"|" \
+                mysql-config.sh > /tmp/mysql-config.sh.tmp
+        mv /tmp/mysql-config.sh.tmp mysql-config.sh
+else
+        my_cnf_path=$(cat mysql-config.sh | \
+                awk 'BEGIN { FS="=" } { gsub("\"", "", $2); if ($1 == "export my_cnf_file") print $2 }')
+fi
+
+cat /etc/my.cnf | grep -q ^datadir=.*
+if [[ $? = 0 ]]; then
+        sed -e "s|datadir=.*|datadir=/var/lib/mysql|" $my_cnf_path > /tmp/my.cnf.tmp
+        mv /tmp/my.cnf.tmp $my_cnf_path
+else
+        echo "[mysqld]" >> $my_cnf_path
+        echo "datadir=/var/lib/mysql" >> $my_cnf_path
+fi
+
 # Updating node state
 ./restfulapi-call.sh "PUT" "system/$system_id/node/$node_id" "state=provisioned"
 status=$?

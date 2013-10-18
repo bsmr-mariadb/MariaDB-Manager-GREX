@@ -44,6 +44,6 @@ while [ $# -gt 2 ] ; do
 	shift
 done
 
-request_uri="system/$scds_system_id/backup/$backupid"
+request_uri="system/$system_id/backup/$backupid"
 
 api_response=`/usr/local/sbin/skysql/restfulapi-call.sh "PUT" "$request_uri" "$data"`
