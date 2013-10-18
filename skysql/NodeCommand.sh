@@ -88,6 +88,28 @@ export rep_password=`echo $node_fields | awk 'BEGIN { RS=","; FS=":" } \
 export privateip=`echo $node_fields | awk 'BEGIN { RS=","; FS=":" } \
         { gsub("\"", "", $0); if ($1 == "privateip") print $2; }'`
 
+# Getting current system DB credentials from API (if undefined at node level)
+system_json=$(./restfulapi-call.sh "GET" "system/$system_id" \
+        "fields=dbusername,dbpassword,repusername,reppassword")
+system_fields=$(echo $system_json | sed 's|^{"system":{||' | sed 's|}}$||')
+
+if [[ "$db_username" == "" ]]; then
+        export db_username=$(echo $system_fields | awk 'BEGIN { RS=","; FS=":" } \
+                { gsub("\"", "", $0); if ($1 == "dbusername") print $2; }')
+fi
+if [[ "$db_password" == "" ]]; then
+        export db_password=$(echo $system_fields | awk 'BEGIN { RS=","; FS=":" } \
+                { gsub("\"", "", $0); if ($1 == "dbpassword") print $2; }')
+fi
+if [[ "$rep_username" == "" ]]; then
+        export rep_username=$(echo $system_fields | awk 'BEGIN { RS=","; FS=":" } \
+                { gsub("\"", "", $0); if ($1 == "repusername") print $2; }')
+fi
+if [[ "$rep_password" == "" ]]; then
+        export rep_password=$(echo $system_fields | awk 'BEGIN { RS=","; FS=":" } \
+                { gsub("\"", "", $0); if ($1 == "rep_password") print $2; }')
+fi
+
 # Test command
 if [ "$step_script" == "test" ]; then
         echo 0; exit
