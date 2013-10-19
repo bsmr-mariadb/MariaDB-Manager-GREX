@@ -1,5 +1,5 @@
 %define _topdir	 	%(echo $PWD)/
-%define name		galera-remote-exec
+%define name		MariaDB-Manager-GREX
 %define release		##RELEASE_TAG##
 %define version 	##VERSION_TAG##
 %define buildroot 	%{_topdir}/%{name}-%{version}-%{release}root
@@ -32,23 +32,23 @@ installed on each of the database nodes.
 
 %post
 
-useradd skysqlagent
+#useradd skysqlagent
 # is  /home/skysqlagent/.ssh/ automatically created?? 
 
-echo "Please put public key to /home/skysqlagent/.ssh/authorized_keys"
-echo "set permissions:"
-echo "chown skysqlagent /home/skysqlagent/.ssh/authorized_keys"
-echo "chmod 600 /home/skysqlagent/.ssh/authorized_keys"
-echo "and restart sshd"
+#echo "Please put public key to /home/skysqlagent/.ssh/authorized_keys"
+#echo "set permissions:"
+#echo "chown skysqlagent /home/skysqlagent/.ssh/authorized_keys"
+#echo "chmod 600 /home/skysqlagent/.ssh/authorized_keys"
+#echo "and restart sshd"
 
 # grant root to NodeCommand.sh
-echo "skysqlagent ALL=NOPASSWD: /usr/local/sbin/skysql/NodeCommand.sh" >> /etc/sudoers
+#echo "skysqlagent ALL=NOPASSWD: /usr/local/sbin/skysql/NodeCommand.sh" >> /etc/sudoers
 touch /var/log/skysql-remote-exec.log
 chown skysqlagent:skysqlagent /var/log/skysql-remote-exec.log
 
 # comment "requiretty" in the sudoers
-sed "s/Defaults.*requiretty/#Defaults     requiretty/g" /etc/sudoers > /etc/sudoers.tmp
-mv /etc/sudoers.tmp /etc/sudoers
+#sed "s/Defaults.*requiretty/#Defaults     requiretty/g" /etc/sudoers > /etc/sudoers.tmp
+#mv /etc/sudoers.tmp /etc/sudoers
 
 %install
 mkdir -p $RPM_BUILD_ROOT%{install_path}
