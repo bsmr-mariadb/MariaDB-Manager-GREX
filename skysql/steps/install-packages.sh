@@ -27,5 +27,6 @@
 
 echo "Command start: install-packages"
 
-yum -y install mariadb-galera-skysql
+yum -y clean all
+yum -y install MariaDB-Galera-server MariaDB-client rsync iproute net-tools grep findutils gawk
 exit $?
