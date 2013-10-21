@@ -68,6 +68,9 @@ else
         echo "datadir=/var/lib/mysql" >> $my_cnf_path
 fi
 
+# Disabling mysqld auto startup on boot
+chkconfig --del mysql
+
 # Updating node state
 ./restfulapi-call.sh "PUT" "system/$system_id/node/$node_id" "state=provisioned"
 status=$?
