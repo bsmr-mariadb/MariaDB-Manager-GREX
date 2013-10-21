@@ -74,9 +74,11 @@ export node_id=`echo $task_fields | awk 'BEGIN { RS=","; FS=":" } \
 
 # Getting current node DB credentials from API
 node_json=`./restfulapi-call.sh "GET" "system/$system_id/node/$node_id" \
-        "fields=dbusername,dbpassword,repusername,reppassword,privateip"`
+        "fields=name,dbusername,dbpassword,repusername,reppassword,privateip"`
 node_fields=`echo $node_json | sed 's|^{"node":{||' | sed 's|}}$||'`
 
+export nodename=`echo $node_fields | awk 'BEGIN { RS=","; FS=":" } \
+        { gsub("\"", "", $0); if ($1 == "name") print $2; }'`
 export db_username=`echo $node_fields | awk 'BEGIN { RS=","; FS=":" } \
         { gsub("\"", "", $0); if ($1 == "dbusername") print $2; }'`
 export db_password=`echo $node_fields | awk 'BEGIN { RS=","; FS=":" } \
