@@ -81,14 +81,14 @@ prepareapply() {
 	
 	# Applying incremental backups
 	INCREMENTALDIR="$RESTOREPATH/incr"
-	rm -fR "$INCREMENTALDIR/*"
+	rm -fR $INCREMENTALDIR/*
 	let "index = $index - 1"
 	while [ "$index" -ge 0 ]
 	do
 		bkpname=${arrbkp[index]}
 		xbstream -x < $backups_path/$bkpname -C "$INCREMENTALDIR"
 		innobackupex --apply-log --defaults-file="$my_cnf_file" --use-memory=1G $USEROPTIONS --incremental-dir="$INCREMENTALDIR" "$RESTOREPATH/extr"
-		rm -fR "$INCREMENTALDIR/*"
+		rm -fR $INCREMENTALDIR/*
 		let "index = $index - 1"
 	done
 
@@ -102,7 +102,7 @@ getbackups() {
 	index=0
 	BACKUPNAME=`ls -1 "$backups_path" | grep -s Backup.$BACKUPID\$`
 
-	while [[ ! "$BACKUPNAME" == "FullBackup*" ]]; do
+	while [[ ! $BACKUPNAME == FullBackup* ]]; do
 		arrbkp[index]="$BACKUPNAME" 
 		. ./steps/backups/getbasebackup.sh
 		export BACKUPID="$BASEBACKUPID"
@@ -116,9 +116,9 @@ getbackups() {
 }
 
 # Cleaning potential hung files from previous aborted restore attempt
-rm -fR "$RESTOREPATH/mysql_tmp_cp/*"
-rm -fR "$RESTOREPATH/extr/*"
-rm -fR "$RESTOREPATH/incr/*"
+rm -fR $RESTOREPATH/mysql_tmp_cp/*
+rm -fR $RESTOREPATH/extr/*
+rm -fR $RESTOREPATH/incr/*
 
 getbackups
 
@@ -177,8 +177,8 @@ if [ $? != 0 ]; then
 fi
 
 # Cleanup phase
-rm -fR "$RESTOREPATH/mysql_tmp_cp/*"
-rm -fR "$RESTOREPATH/extr/*"
-rm -fR "$RESTOREPATH/incr/*"
+rm -fR $RESTOREPATH/mysql_tmp_cp/*
+rm -fR $RESTOREPATH/extr/*
+rm -fR $RESTOREPATH/incr/*
 
 exit 0
