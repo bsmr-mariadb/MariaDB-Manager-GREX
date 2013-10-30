@@ -26,10 +26,10 @@
 # command execution.
 #
 
-echo `date "+%Y%m%d_%H%M%S"` "-- Command start: configure"
+echo $(date "+%Y%m%d_%H%M%S") "-- Command start: configure"
 
 # Creating MariaDB configuration file
-hostname=`uname -n`
+hostname=$(uname -n)
 sed -e "s/###NODE-ADDRESS###/$privateip/" \
 	-e "s/###NODE-NAME###/$nodename/" \
 	-e "s/###REP-USERNAME###/$rep_username/" \
@@ -44,7 +44,6 @@ sleep 5
 mysql -u root -e "DELETE FROM mysql.user WHERE user = ''; \
 GRANT ALL PRIVILEGES ON *.* TO $rep_username@'%' IDENTIFIED BY '$rep_password'; \
 GRANT ALL PRIVILEGES ON *.* TO $db_username@'%' IDENTIFIED BY '$db_password'; \
-GRANT ALL PRIVILEGES ON *.* TO root@'%' IDENTIFIED BY 'sky' WITH GRANT OPTION; \
 FLUSH PRIVILEGES;"
 
 /etc/init.d/mysql stop
@@ -73,10 +72,15 @@ fi
 chkconfig --del mysql
 
 # Updating node state
-./restfulapi-call.sh "PUT" "system/$system_id/node/$node_id" "state=provisioned"
-status=$?
-
-if [ $status != 0 ] ; then
+state_json=$(api_call "PUT" "system/$system_id/node/$node_id" "state=provisioned")
+if [[ $? != 0 ]] ; then
+	set_error "Failed to set the node state to provisioned"
 	logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to provisioned"
+	exit 1
 fi
-exit $status
+json_error "$state_json"
+if [[ "$json_err" != "0" ]]; then
+	set_error "Failed to set the node state to provisioned"
+        logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to provisioned"
+        exit 1
+fi

@@ -36,10 +36,10 @@ mkdir -p "$RESTOREPATH/extr"
 mkdir -p "$RESTOREPATH/mysql_tmp_cp"
 
 USEROPTIONS="--user=$db_username --password=$db_password"
-DATAFOLDER=`cat $my_cnf_file | awk 'BEGIN { FS="=" } { if ($1 == "datadir") print $2 }'`
+DATAFOLDER=$(cat $my_cnf_file | awk 'BEGIN { FS="=" } { if ($1 == "datadir") print $2 }')
 
-if [ "$DATAFOLDER" == "" ] ; then
-	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Data folder not defined in MySQL configuration file"
+if [[ "$DATAFOLDER" == "" ]] ; then
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Data folder not defined in MySQL configuration file"
 	exit 1
 fi
 
@@ -69,8 +69,8 @@ prepareapply() {
 
 	# Preparing base backup
 	innobackupex $USEROPTIONS --defaults-file "$my_cnf_file" --apply-log --redo-only "$RESTOREPATH/extr" &> $TMPFILE
-	if [ -z "`tail -1 $TMPFILE | grep 'completed OK!'`" ] ; then
-		echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "Restore failed (stage 'preparing the backup'):"; echo
+	if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
+		echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "Restore failed (stage 'preparing the backup'):"; echo
 		echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
 		cat $TMPFILE
 		rm -f $TMPFILE
@@ -83,7 +83,7 @@ prepareapply() {
 	INCREMENTALDIR="$RESTOREPATH/incr"
 	rm -fR $INCREMENTALDIR/*
 	let "index = $index - 1"
-	while [ "$index" -ge 0 ]
+	while [[ "$index" -ge 0 ]]
 	do
 		bkpname=${arrbkp[index]}
 		xbstream -x < $backups_path/$bkpname -C "$INCREMENTALDIR"
@@ -100,13 +100,18 @@ prepareapply() {
 # getbackups(): downloads all the backups and stores them into an array, last pos == base fullbackup 
 getbackups() {
 	index=0
-	BACKUPNAME=`ls -1 "$backups_path" | grep -s Backup.$BACKUPID\$`
+	BACKUPNAME=$(ls -1 "$backups_path" | grep -s Backup.$BACKUPID\$)
 
-	while [[ ! $BACKUPNAME == FullBackup* ]]; do
+	while [[ ! "$BACKUPNAME" == FullBackup* ]]; do
+		if [[ "$BACKUPNAME" == "" ]]; then
+			echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "Backup file not found"
+			set_error "Backup file not found."
+			exit 1
+		fi
 		arrbkp[index]="$BACKUPNAME" 
 		. ./steps/backups/getbasebackup.sh
 		export BACKUPID="$BASEBACKUPID"
-		BACKUPNAME=`ls -1 "$backups_path" | grep -s Backup.$BACKUPID\$`
+		BACKUPNAME=$(ls -1 "$backups_path" | grep -s Backup.$BACKUPID\$)
 		let "index = $index + 1"
 	done
 
@@ -122,8 +127,8 @@ rm -fR $RESTOREPATH/incr/*
 
 getbackups
 
-if [ -z "`tail -1 $TMPFILE | grep 'completed OK!'`" ] ; then
-	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Restore failed - stage 'preparing the backup':"; 
+if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Restore failed - stage 'preparing the backup':"; 
 	echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
 	cat $TMPFILE
 	rm -f $TMPFILE
@@ -135,8 +140,8 @@ fi
 # Stopping mysqld
 /etc/init.d/mysql stop
 
-if [[ `mysqladmin $USEROPTIONS status | awk '{print $1}'` == "Uptime:" ]]; then
-	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Server not properly shut down"
+if [[ $(mysqladmin $USEROPTIONS status | awk '{print $1}') == "Uptime:" ]]; then
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Server not properly shut down"
 	exit 1
 fi
 
@@ -149,15 +154,15 @@ innobackupex $USEROPTIONS --defaults-file "$my_cnf_file" --copy-back "$RESTOREPA
 # Changing mysql data folder ownership back to mysql
 chown -R mysql:mysql "$DATAFOLDER"
 
-if [ -z "`tail -1 $TMPFILE | grep 'completed OK!'`" ] ; then
- echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Restore failed - stage 'copyback backup':"; 
- echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
+if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Restore failed - stage 'copyback backup':"; 
+	echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
 
- cat $TMPFILE
- rm -f $TMPFILE
- exit 1
+	cat $TMPFILE
+	rm -f $TMPFILE
+	exit 1
 else
- cat $TMPFILE
+	cat $TMPFILE
 fi
 
 # Restarting mysqld
@@ -165,15 +170,15 @@ fi
 
 sleep 10
 
-if [ ! `mysqladmin $USEROPTIONS status | awk '{print $1}'` == "Uptime:" ]; then
- echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Server not properly started"
- exit 1
+if [[ ! $(mysqladmin $USEROPTIONS status | awk '{print $1}') == "Uptime:" ]]; then
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Server not properly started"
+	exit 1
 fi
 
 mysql $USEROPTIONS -e "SET GLOBAL wsrep_provider=none;"
-if [ $? != 0 ]; then
- echo Unable to set global wsrep_provider
- exit 1
+if [[ $? != 0 ]]; then
+	echo "Unable to set global wsrep_provider."
+	exit 1
 fi
 
 # Cleanup phase

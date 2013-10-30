@@ -32,18 +32,18 @@
 
 . ./restfulapicredentials.sh
 
-if [ $# -lt 2 ] ; then
+if [[ $# -lt 2 ]] ; then
 	echo $Usage: $0 '<Backup ID>' '<State>' '[size=<size>]|[storage=<path>]|[binlog=<binlog>]|[log=<Log URL>]'
 	exit
 fi
 backupid=$1
 
 data='state='$2
-while [ $# -gt 2 ] ; do
+while [[ $# -gt 2 ]] ; do
 	data=${data}'&'$3
 	shift
 done
 
 request_uri="system/$system_id/backup/$backupid"
 
-api_response=`/usr/local/sbin/skysql/restfulapi-call.sh "PUT" "$request_uri" "$data"`
+api_response=$(api_call "PUT" "$request_uri" "$data")

@@ -28,30 +28,24 @@
 
 . ./remote-scripts-config.sh
 
-echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command start: isolate"
+echo "INFO :" $(date "+%Y%m%d_%H%M%S") "-- Command start: isolate"
 
 # Setting the state of the command to running
-./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
+api_call "PUT" "task/$taskid" "state=running"
 
 mysql -u $db_username -p$db_password -e "SET GLOBAL wsrep_provider=none;"
 mysql_status=$?
-if [ $mysql_status != 0 ]; then
-	./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=Failed to set global wsrep_provider" > /dev/null
+if [[ $mysql_status != 0 ]]; then
+	set_error "Failed to set global wsrep_provider"
 	echo Unable to set global variable wsrep_provider
 	exit $mysql_status
 fi
 
-no_retries=$state_wait_retries
-while [ $no_retries -gt 0 ]
-do
-	sleep 1
-	node_state=`./get-node-state.sh`
-	if [[ "$node_state" == "isolated" ]]; then
-		echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command finished successfully"
-		exit 0
-	fi
-	no_retries=$((no_retries - 1))
-done
-echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Command finished with an error: node state not OK"
-./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=Timeout waiting for node to become isolated"
-exit 1
+$(wait_for_state "isolated")
+if [[ $? -eq 0 ]]; then
+	echo "INFO :" $(date "+%Y%m%d_%H%M%S") "-- Command finished successfully"
+else
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Command finished with an error: node state not OK"
+	set_error "Timeout waiting for node to become isolated"
+	exit 1
+fi

@@ -26,7 +26,7 @@
 # accordingly.
 #
 
-echo `date "+%Y%m%d_%H%M%S"` "-- Command start: probe"
+echo $(date "+%Y%m%d_%H%M%S") "-- Command start: probe"
 
 mysqld_found=false
 mysqld_comp=false
@@ -35,38 +35,42 @@ mysql_port_busy=false
 new_state='unprovisioned'
 
 # Checking for mysqld on PATH directories
-version_output=`mysqld --version`
-if [ $? == 0 ]; then
+version_output=$(mysqld --version)
+if [[ $? == 0 ]]; then
 	mysqld_found=true
 	echo $version_output | grep "MariaDB.*wsrep"
-	if [ $? == 0 ]; then
-		logger -p user.info -t MariaDB-Manager-Task "Probe: A MySQL configurtion with the Galera replicator has been detected"
+	if [[ $? == 0 ]]; then
+		logger -p user.info -t MariaDB-Manager-Task \
+			"Probe: A MySQL configuration with the Galera replicator has been detected."
 		mysqld_comp=true
 	fi	
 fi
 
 # Checking for MariaDB/Galera installation on rpm
 rpm -qa | grep MariaDB-Galera
-if [ $? == 0 ]; then
-	logger -p user.info -t MariaDB-Manager-Task "Probe: The MariaDB-Galera RPM package is already installed"
+if [[ $? == 0 ]]; then
+	logger -p user.info -t MariaDB-Manager-Task \
+		"Probe: The MariaDB-Galera RPM package is already installed."
 	rpm_installed=true
 fi
 
 # Checking if port 3306 is busy
 netstat -a | egrep -is "tcp.*(3306)|(mysql).*LISTEN"
-if [ $? == 0 ]; then
+if [[ $? == 0 ]]; then
 	mysql_port_busy=true
-	logger -p user.info -t MariaDB-Manager-Task "Probe: A listener already exists on the MySQL port"
+	logger -p user.info -t MariaDB-Manager-Task "Probe: A listener already exists on the MySQL port."
 fi
 
 # Determining next state
 if $mysqld_found ; then
 	if $mysqld_comp ; then
 		new_state='provisioned'
-		logger -p user.info -t MariaDB-Manager-Task "Probe: A compatible MySQL installation detected"
+		logger -p user.info -t MariaDB-Manager-Task \
+			"Probe: A compatible MySQL installation detected."
 	else
 		new_state='incompatible'
-		logger -p user.info -t MariaDB-Manager-Task "Probe: An incompatible MySQL installation detected"
+		logger -p user.info -t MariaDB-Manager-Task \
+			"Probe: An incompatible MySQL installation detected."
 	fi
 elif $rpm_installed ; then
 	new_state='provisioned'
@@ -75,4 +79,15 @@ elif $mysql_port_busy ; then
 fi
 
 # Updating node state
-./restfulapi-call.sh "PUT" "system/$system_id/node/$node_id" "state=$new_state"
+state_json=$(api_call "PUT" "system/$system_id/node/$node_id" "state=$new_state")
+if [[ $? != 0 ]] ; then
+        set_error "Failed to set the node state to $new_state."
+        logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to $new_state."
+        exit 1
+fi
+json_error "$state_json"
+if [[ "$json_err" != "0" ]]; then
+        set_error "Failed to set the node state to $new_state."
+        logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to $new_state."
+        exit 1
+fi

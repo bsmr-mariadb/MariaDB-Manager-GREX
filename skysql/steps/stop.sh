@@ -27,30 +27,24 @@
 
 . ./remote-scripts-config.sh
 
-echo `date "+%Y%m%d_%H%M%S"` "-- Command start: stop"
+echo $(date "+%Y%m%d_%H%M%S") "-- Command start: stop"
 
 # Setting the state of the command to running
-./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
+api_call "PUT" "task/$taskid" "state=running"
 
 /etc/init.d/mysql stop
 stop_status=$?
-if [ $stop_status != 0 ]; then
-	echo `date "+%Y%m%d_%H%M%S"` mysql stop returned failure
-	./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=MySQL stopcommand failed" > /dev/null
+if [[ "$stop_status" != 0 ]]; then
+	echo $(date "+%Y%m%d_%H%M%S") "MariaDB stop returned failure"
+	set_error "MariaDB stop command failed."
 	exit $stop_status
 fi
 
-no_retries=$state_wait_retries
-while [ "$no_retries" -gt 0 ]
-do
-        sleep 1
-        node_state=`./get-node-state.sh`
-        if [[ "$node_state" == "down" ]]; then
-                echo `date "+%Y%m%d_%H%M%S"` "-- Command finished successfully"
-                exit 0
-        fi
-        no_retries=$((no_retries - 1))
-done
-echo `date "+%Y%m%d_%H%M%S"` "-- Command finished with an error: node state not OK"
-exit 1
-
+$(wait_for_state "down")
+if [[ $? -eq 0 ]]; then
+	echo $(date "+%Y%m%d_%H%M%S") "-- Command finished successfully"
+else
+	set_error "Timeout waiting for node to stop."
+	echo $(date "+%Y%m%d_%H%M%S") "-- Command finished with an error: node state not OK"
+	exit 1
+fi

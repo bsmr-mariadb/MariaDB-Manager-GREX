@@ -32,22 +32,22 @@ TMPFILE="/tmp/innobackupex-runner.$$.tmp"
 USEROPTIONS="--user=$db_username --password=$db_password"
 
 # Checking if backup tool exists
-if [ ! -x `which innobackupex` ]; then
-	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- 'innobackupex' command does not exist."
+if [[ ! -x $(which innobackupex) ]]; then
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- 'innobackupex' command does not exist."
 	exit 1
 fi
 
 # Checking if the script can access the database
-if ! `echo 'exit' | /usr/bin/mysql -s $USEROPTIONS` ; then
-	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Supplied mysql username or password appears to be incorrect."
+if ! $(echo 'exit' | /usr/bin/mysql -s $USEROPTIONS) ; then
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Supplied mysql username or password appears to be incorrect."
 	exit 1
 fi
 
 # Generating the backup file
 innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --stream=tar ./ > "$backups_path/FullBackup.$BACKUPID" 2> $TMPFILE
 
-if [ -z "`tail -1 $TMPFILE | grep 'completed OK!'`" ] ; then
-	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- $INNOBACKUPEX failed:"; echo
+if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- $INNOBACKUPEX failed:"; echo
 	echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
 	cat $TMPFILE
 	rm -f $TMPFILE

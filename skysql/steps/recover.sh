@@ -29,45 +29,41 @@
 
 . ./remote-scripts-config.sh
 
-echo `date "+%Y%m%d_%H%M%S"` "-- Command start: recover"
+echo $(date "+%Y%m%d_%H%M%S") "-- Command start: recover"
 
 # Setting the state of the command to running
-./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
+api_call "PUT" "task/$taskid" "state=running"
 
 # Getting the IP of an online node
-cluster_online_ip=`./get-online-node.sh`
+cluster_online_ip=$(get_online_node)
 
-if [ -n $cluster_online_ip ]; then
+if [[ -n $cluster_online_ip ]]; then
 	# Finding the Galera wsrep library
-	if [ -f /usr/lib/galera/libgalera_smm.so ]; then
-		mysql -u $db_username -p$db_password -e "SET GLOBAL wsrep_provider='/usr/lib/galera/libgalera_smm.so';"
-	elif [ -f /usr/lib64/galera/libgalera_smm.so ]; then
-		mysql -u $db_username -p$db_password -e "SET GLOBAL wsrep_provider='/usr/lib64/galera/libgalera_smm.so';"
+	if [[ -f /usr/lib/galera/libgalera_smm.so ]]; then
+		mysql -u $db_username -p$db_password -e \
+			"SET GLOBAL wsrep_provider='/usr/lib/galera/libgalera_smm.so';"
+	elif [[ -f /usr/lib64/galera/libgalera_smm.so ]]; then
+		mysql -u $db_username -p$db_password -e \
+			"SET GLOBAL wsrep_provider='/usr/lib64/galera/libgalera_smm.so';"
 	else
-		echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- No Galera wsrep library found."
-		./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=Failed to find Galera wsrep library"
+		echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- No Galera wsrep library found."
+		set_error "Failed to find Galera wsrep library."
 		exit 1
 	fi
 
-	mysql -u $db_username -p$db_password -e "SET GLOBAL wsrep_cluster_address='gcomm://$cluster_online_ip:4567';"
+	mysql -u $db_username -p$db_password -e \
+		"SET GLOBAL wsrep_cluster_address='gcomm://$cluster_online_ip:4567';"
 else
-	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- No active cluster to rejoin."
-	./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=No active cluster to join"
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- No active cluster to rejoin."
+	set_error "No active cluster to join"
 	exit 1
 fi
 
-no_retries=$state_wait_retries
-while [ $no_retries -gt 0 ]
-do
-        sleep 1
-        node_state=`./get-node-state.sh`
-        if [[ "$node_state" == "joined" ]]; then
-                echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command finished successfully"
-                exit 0
-        fi
-        no_retries=$((no_retries - 1))
-done
-echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Command finished with an error: node state not OK"
-./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=Timeout waitign for noe to join the cluster"
-exit 1
-
+$(wait_for_state "joined")
+if [[ $? -eq 0 ]]; then
+	echo "INFO :" $(date "+%Y%m%d_%H%M%S") "-- Command finished successfully"
+else
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Command finished with an error: node state not OK"
+	set_error "Timeout waiting for node to join the cluster."
+	exit 1
+fi

@@ -30,7 +30,7 @@ echo "Command start: firewall-setup"
 
 # Check if the iptables command is avialable
 which iptables > /dev/null 2>&1
-if [ $? == 0 ]; then
+if [[ $? == 0 ]]; then
 
 	# Only open the Galera ports 4444, 4567, 4568 to the network
 	# that are used to communicate with the api_host - this is likely
@@ -39,8 +39,8 @@ if [ $? == 0 ]; then
 	# Open port 3306 to all networks as we do not know where clients
 	# will connect from
 
-	dev=`ip route get "$api_host" | awk '$2 == "dev" { print $3 } $4 == "dev" { print $5 }'`
-	if [ x"$dev" == "x" ]; then
+	dev=$(ip route get "$api_host" | awk '$2 == "dev" { print $3 } $4 == "dev" { print $5 }')
+	if [[ x"$dev" == "x" ]]; then
 		iptables -I INPUT -p tcp -m tcp --dport 4567 -j ACCEPT
 		iptables -I INPUT -p tcp -m tcp --dport 4568 -j ACCEPT
 		iptables -I INPUT -p tcp -m tcp --dport 4444 -j ACCEPT
@@ -68,7 +68,7 @@ if [ $? == 0 ]; then
 fi
 
 # Disable selinux
-if [ -d /etc/selinux ]; then
+if [[ -d /etc/selinux ]]; then
 	setenforce 0
 	sed -e 's/SELINUX=.*/SELINUX=permissive/' < /etc/selinux/config \
 		> /tmp/selinux_config \
@@ -78,7 +78,7 @@ if [ -d /etc/selinux ]; then
 fi
 
 # Check for AppArmor and enable mysql
-if [ -d /etc/apparmor.d ]; then
+if [[ -d /etc/apparmor.d ]]; then
 	ln -s /etc/apparmor.d/usr.sbin.mysqld /etc/apparmor.d/disable/usr.sbin.mysqld
 	service apparmor restart
 	logger -p user.info -t MariaDB-Manager-Remote "Disabled MySQL in AppAmor"

@@ -28,15 +28,15 @@
 
 . ./remote-scripts-config.sh
 
-echo `date "+%Y%m%d_%H%M%S"` "-- Command start: start"
+echo $(date "+%Y%m%d_%H%M%S") "-- Command start: start"
 
 # Setting the state of the command to running
-./restfulapi-call.sh "PUT" "task/$taskid" "state=running" > /dev/null
+api_call "PUT" "task/$taskid" "state=running"
 
 # Getting the IP of an online node
-cluster_online_ip=`./get-online-node.sh`
+cluster_online_ip=$(get_online_node)
 
-if [ -n "$cluster_online_ip" ]; then
+if [[ -n "$cluster_online_ip" ]]; then
         /etc/init.d/mysql start --wsrep-cluster-address=gcomm://$cluster_online_ip:4567
 	start_status=$?
 else # Starting a new cluster
@@ -44,24 +44,17 @@ else # Starting a new cluster
 	start_status=$?
 fi
 
-if [ $start_status != 0 ]; then
-	echo `date "+%Y%m%d_%H%M%S"` mysql start returned failure
-	./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=mysql start command failed" > /dev/null
-	exit $stop_status
+if [[ $start_status != 0 ]]; then
+	echo $(date "+%Y%m%d_%H%M%S") "MariaDB start returned failure"
+	set_error "MariaDB start command failed."
+	exit $start_status
 fi
 
-no_retries=$state_wait_retries
-while [ "$no_retries" -gt 0 ]
-do
-        sleep 1
-        node_state=`./get-node-state.sh`
-        if [[ "$node_state" == "joined" ]]; then
-                echo "INFO :" `date "+%Y%m%d_%H%M%S"` "-- Command finished successfully"
-                exit 0
-        fi
-        no_retries=$((no_retries - 1))
-done
-./restfulapi-call.sh "PUT" "task/$taskid" "errormessage=Timeout waiting for node to start"
-echo `date "+%Y%m%d_%H%M%S"` "-- Command finished with an error: node state not OK"
-exit 1
-
+$(wait_for_state "joined")
+if [[ $? -eq 0 ]]; then
+	echo "INFO :" $(date "+%Y%m%d_%H%M%S") "-- Command finished successfully"
+else
+	set_error "Timeout waiting for node to start."
+	echo $(date "+%Y%m%d_%H%M%S") "-- Command finished with an error: node state not OK"
+	exit 1
+fi

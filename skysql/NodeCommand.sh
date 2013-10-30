@@ -36,27 +36,30 @@ export api_host=$3
 shift 3
 params=$@
 
-scripts_dir=`dirname $0`
+scripts_dir=$(dirname $0)
 cd $scripts_dir
+
+. ./restfulapicredentials.sh
+. ./functions.sh
 
 logger -p user.info -t MariaDB-Enterprise-Remote "Task: $taskid Command: $step_script $params" 
 
 # Validations
-if [ "$step_script" == "" ]; then
+if [[ "$step_script" == "" ]]; then
 	logger -p user.error -t MariaDB-Enterprise-Remote \
 			"Task: $taskid Parameter value not defined: step"
 	echo "1"
 	exit 1
 fi
 
-if [ "$taskid" == "" ]; then
+if [[ "$taskid" == "" ]]; then
 	logger -p user.error -t MariaDB-Enterprise-Remote \
 			"Task: $taskid Parameter value not defined: task id"
 	echo "1"
 	exit 1
 fi
 
-if [ "$api_host" == "" ]; then
+if [[ "$api_host" == "" ]]; then
 	logger -p user.error -t MariaDB-Enterprise-Remote \
 			"Task: $taskid Parameter value not defined: api_host"
 	echo "1"
@@ -64,56 +67,56 @@ if [ "$api_host" == "" ]; then
 fi
 
 # Getting current node system information from API
-task_json=`./restfulapi-call.sh "GET" "task/$taskid" "fields=systemid,nodeid"`
-task_fields=`echo $task_json | sed 's|^{"task":{||' | sed 's|}}$||'`
+task_json=$(api_call "GET" "task/$taskid" "fields=systemid,nodeid")
+task_fields=$(echo "$task_json" | sed 's|^{"task":{||' | sed 's|}}$||')
 
-export system_id=`echo $task_fields | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "systemid") print $2; }'`
-export node_id=`echo $task_fields | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "nodeid") print $2; }'`
+export system_id=$(echo "$task_fields" | awk 'BEGIN { RS=","; FS=":" } \
+        { gsub("\"", "", $0); if ($1 == "systemid") print $2; }')
+export node_id=$(echo "$task_fields" | awk 'BEGIN { RS=","; FS=":" } \
+        { gsub("\"", "", $0); if ($1 == "nodeid") print $2; }')
 
 # Getting current node DB credentials from API
-node_json=`./restfulapi-call.sh "GET" "system/$system_id/node/$node_id" \
-        "fields=name,dbusername,dbpassword,repusername,reppassword,privateip"`
-node_fields=`echo $node_json | sed 's|^{"node":{||' | sed 's|}}$||'`
+node_json=$(api_call "GET" "system/$system_id/node/$node_id" \
+        "fields=name,dbusername,dbpassword,repusername,reppassword,privateip")
+node_fields=$(echo "$node_json" | sed 's|^{"node":{||' | sed 's|}}$||')
 
-export nodename=`echo $node_fields | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "name") print $2; }'`
-export db_username=`echo $node_fields | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "dbusername") print $2; }'`
-export db_password=`echo $node_fields | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "dbpassword") print $2; }'`
-export rep_username=`echo $node_fields | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "repusername") print $2; }'`
-export rep_password=`echo $node_fields | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "reppassword") print $2; }'`
-export privateip=`echo $node_fields | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "privateip") print $2; }'`
+export nodename=$(echo "$node_fields" | awk 'BEGIN { RS=","; FS=":" } \
+        { gsub("\"", "", $0); if ($1 == "name") print $2; }')
+export db_username=$(echo "$node_fields" | awk 'BEGIN { RS=","; FS=":" } \
+        { gsub("\"", "", $0); if ($1 == "dbusername") print $2; }')
+export db_password=$(echo "$node_fields" | awk 'BEGIN { RS=","; FS=":" } \
+        { gsub("\"", "", $0); if ($1 == "dbpassword") print $2; }')
+export rep_username=$(echo "$node_fields" | awk 'BEGIN { RS=","; FS=":" } \
+        { gsub("\"", "", $0); if ($1 == "repusername") print $2; }')
+export rep_password=$(echo "$node_fields" | awk 'BEGIN { RS=","; FS=":" } \
+        { gsub("\"", "", $0); if ($1 == "reppassword") print $2; }')
+export privateip=$(echo "$node_fields" | awk 'BEGIN { RS=","; FS=":" } \
+        { gsub("\"", "", $0); if ($1 == "privateip") print $2; }')
 
 # Getting current system DB credentials from API (if undefined at node level)
-system_json=$(./restfulapi-call.sh "GET" "system/$system_id" \
+system_json=$(api_call "GET" "system/$system_id" \
         "fields=dbusername,dbpassword,repusername,reppassword")
-system_fields=$(echo $system_json | sed 's|^{"system":{||' | sed 's|}}$||')
+system_fields=$(echo "$system_json" | sed 's|^{"system":{||' | sed 's|}}$||')
 
 if [[ "$db_username" == "" ]]; then
-        export db_username=$(echo $system_fields | awk 'BEGIN { RS=","; FS=":" } \
+        export db_username=$(echo "$system_fields" | awk 'BEGIN { RS=","; FS=":" } \
                 { gsub("\"", "", $0); if ($1 == "dbusername") print $2; }')
 fi
 if [[ "$db_password" == "" ]]; then
-        export db_password=$(echo $system_fields | awk 'BEGIN { RS=","; FS=":" } \
+        export db_password=$(echo "$system_fields" | awk 'BEGIN { RS=","; FS=":" } \
                 { gsub("\"", "", $0); if ($1 == "dbpassword") print $2; }')
 fi
 if [[ "$rep_username" == "" ]]; then
-        export rep_username=$(echo $system_fields | awk 'BEGIN { RS=","; FS=":" } \
+        export rep_username=$(echo "$system_fields" | awk 'BEGIN { RS=","; FS=":" } \
                 { gsub("\"", "", $0); if ($1 == "repusername") print $2; }')
 fi
 if [[ "$rep_password" == "" ]]; then
-        export rep_password=$(echo $system_fields | awk 'BEGIN { RS=","; FS=":" } \
+        export rep_password=$(echo "$system_fields" | awk 'BEGIN { RS=","; FS=":" } \
                 { gsub("\"", "", $0); if ($1 == "rep_password") print $2; }')
 fi
 
 # Test command
-if [ "$step_script" == "test" ]; then
+if [[ "$step_script" == "test" ]]; then
         echo 0; exit
 fi
 
@@ -121,7 +124,7 @@ fi
 fullpath="$scripts_dir/steps/$step_script.sh $params"
 sh $fullpath            > /tmp/remote.$$.log 2>&1
 return_status=$?
-if [ $return_status == 0 ]; then
+if [[ $return_status == 0 ]]; then
 	pri="user.info"
 else
 	pri="user.error"

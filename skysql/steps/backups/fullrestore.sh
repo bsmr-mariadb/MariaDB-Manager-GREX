@@ -28,10 +28,10 @@
 TMPFILE="/tmp/innobackupex-runner.$$.tmp"
 
 RESTOREPATH="/tmp"
-DATAFOLDER=`cat "$my_cnf_file" | awk 'BEGIN { FS="=" } { if ($1 == "datadir") print $2 }'`
+DATAFOLDER=$(cat "$my_cnf_file" | awk 'BEGIN { FS="=" } { if ($1 == "datadir") print $2 }')
 
-if [ "$DATAFOLDER" == "" ] ; then
-        echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Data folder not defined in MySQL configuration file"
+if [[ "$DATAFOLDER" == "" ]] ; then
+        echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Data folder not defined in MySQL configuration file"
         exit 1
 fi
 
@@ -42,8 +42,8 @@ mkdir -p "$RESTOREPATH/mysql_tmp_cp"
 USEROPTIONS="--user=$db_username --password=$db_password"
 
 # Checking if the script can access the database
-if ! `echo 'exit' | /usr/bin/mysql -s $USEROPTIONS` ; then
-	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Supplied mysql username or password appears to be incorrect"
+if ! $(echo 'exit' | /usr/bin/mysql -s $USEROPTIONS) ; then
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Supplied mysql username or password appears to be incorrect"
 	exit 1
 fi
 
@@ -54,7 +54,7 @@ rm -rf "$RESTOREPATH/extr"
 mkdir -p "$RESTOREPATH/extr"
 
 # Untarring previously retrieved fullbackup
-cur=`pwd`
+cur=$(pwd)
 cd "$RESTOREPATH/extr"
 tar -xivf "$backups_path/FullBackup.$BACKUPID"
 cd $cur
@@ -62,7 +62,7 @@ cd $cur
 # Preparing the backup - applying logs
 innobackupex $USEROPTIONS --defaults-file "$my_cnf_file" --apply-log "$RESTOREPATH/extr" &> $TMPFILE
 
-if [ -z "`tail -1 $TMPFILE | grep 'completed OK!'`" ] ; then
+if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
 	echo "Restore failed (stage 'preparing the backup'):"; echo
 	echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
 	cat $TMPFILE
@@ -75,10 +75,10 @@ fi
 # Stopping mysqld
 /etc/init.d/mysql stop
 
-mysql_status=`mysqladmin $USEROPTIONS status | awk '{print $1}'`
+mysql_status=$(mysqladmin $USEROPTIONS status | awk '{print $1}')
 
 if [[ "$mysql_status" == "Uptime:" ]]; then
-	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Server not properly shut down"
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Server not properly shut down"
 	exit 1
 fi
 
@@ -88,8 +88,8 @@ mv $DATAFOLDER/* $RESTOREPATH/mysql_tmp_cp/
 # Restore by copyback of the backup folder into data folder
 innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --copy-back "$RESTOREPATH/extr/" &> $TMPFILE
 
-if [ -z "`tail -1 $TMPFILE | grep 'completed OK!'`" ] ; then
-	echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Restore failed (stage 'copyback backup'):"; echo
+if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Restore failed (stage 'copyback backup'):"; echo
 	echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
 
 	cat $TMPFILE
@@ -104,26 +104,26 @@ chown -R mysql:mysql $DATAFOLDER
 
 # Restarting mysqld
 /etc/init.d/mysql start --wsrep-cluster-address=gcomm://
-if [ $? != 0 ]; then
- echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Server not properly started"
- exit 1
+if [[ $? != 0 ]]; then
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Server not properly started"
+	exit 1
 fi
 
 sleep 10
 
-if [ ! `mysqladmin $USEROPTIONS status | awk '{print $1}'` == "Uptime:" ]; then
- echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Server not properly started"
- exit 1
+if [[ ! $(mysqladmin $USEROPTIONS status | awk '{print $1}') == "Uptime:" ]]; then
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Server not properly started"
+	exit 1
 fi
 
 mysql $USEROPTIONS -e "SET GLOBAL wsrep_provider=none;"
-if [ $? != 0 ]; then
- echo "ERROR :" `date "+%Y%m%d_%H%M%S"` "-- Failed to isolate node"
- exit 1
+if [[ $? != 0 ]]; then
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Failed to isolate node"
+	exit 1
 fi
 
 # Cleanup phase
-rm -fR "$RESTOREPATH/mysql_tmp_cp/*"
-rm -fR "$RESTOREPATH/extr/*"
+rm -fR $RESTOREPATH/mysql_tmp_cp/*
+rm -fR $RESTOREPATH/extr/*
 
 exit 0
