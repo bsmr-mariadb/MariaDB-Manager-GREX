@@ -28,7 +28,7 @@
 
 . ./remote-scripts-config.sh
 
-echo $(date "+%Y%m%d_%H%M%S") "-- Command start: start"
+logger -p user.info -t MariaDB-Manager-Task "Command start: start"
 
 # Setting the state of the command to running
 api_call "PUT" "task/$taskid" "state=running"
@@ -36,7 +36,7 @@ api_call "PUT" "task/$taskid" "state=running"
 # Getting the IP of an online node
 cluster_online_ip=$(get_online_node)
 
-if [[ -n "$cluster_online_ip" ]]; then
+if [[ "$cluster_online_ip" != "null" ]]; then
         /etc/init.d/mysql start --wsrep-cluster-address=gcomm://$cluster_online_ip:4567
 	start_status=$?
 else # Starting a new cluster
@@ -45,16 +45,16 @@ else # Starting a new cluster
 fi
 
 if [[ $start_status != 0 ]]; then
-	echo $(date "+%Y%m%d_%H%M%S") "MariaDB start returned failure"
+	logger -p user.error -t MariaDB-Manager-Task "MariaDB start returned failure."
 	set_error "MariaDB start command failed."
 	exit $start_status
 fi
 
 $(wait_for_state "joined")
 if [[ $? -eq 0 ]]; then
-	echo "INFO :" $(date "+%Y%m%d_%H%M%S") "-- Command finished successfully"
+	logger -p user.info -t MariaDB-Manager-Task "Command finished successfully"
 else
 	set_error "Timeout waiting for node to start."
-	echo $(date "+%Y%m%d_%H%M%S") "-- Command finished with an error: node state not OK"
+	logger -p user.error -t MariaDB-Manager-Task "Command finished with an error: node state not OK"
 	exit 1
 fi

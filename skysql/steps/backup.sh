@@ -28,12 +28,11 @@
 # $1: Backup type ("Full" or "Incremental")
 # $2: Base BackupID (only required if $1 = "Incremental)
 
-echo $(date "+%Y%m%d_%H%M%S") "-- Command start: backup"
-echo $(date "+%Y%m%d_%H%M%S") "-- params: backup_type $1; base_backup_id $2"
+logger -p user.info -t MariaDB-Manager-Task "Command start: backup"
 
 # Parameter validation
 if [[ "$1" == "" ]] ; then
-	echo $(date "+%Y%m%d_%H%M%S") "-- $0 invoked with no parameters"
+	logger -p user.error -t MariaDB-Manager-Task "$0 invoked with no parameters"
 	set_error "Missing parameters, backup should be called with a backup type and an optional id."
 	exit 1
 fi
@@ -45,13 +44,12 @@ elif [[ "$1" == Incremental* ]] ; then
 	if [[ $# -ge 2 ]]; then
 		export BASEBACKUPID=$2
 	else
-		echo $(date "+%Y%m%d_%H%M%S") "if level is 2 (incremental) <basebackupid> is required"
-                echo 'Usage: $0 <system id> <node id> <level> [<basebackupid>]'
+		logger -p user.error -t MariaDB-Manager-Task "Missing backup ID for incremental backup."
 		set_error "Missing backup ID for incremental backup."
                 exit 1
 	fi
 else
-	echo $(date "+%Y%m%d_%H%M%S") "-- Invalid parameters"
+	logger -p user.error -t MariaDB-Manager-Task "Invalid parameters for backup step."
 	set_error "Invalid parameters for backup step."
 	exit 1
 fi
@@ -76,8 +74,8 @@ elif [[ "$level" -eq 2 ]] ; then
 	bkstatus=$?
 	backupfilename="IncrBackup.$BACKUPID"
 else
-        echo $(date "+%Y%m%d_%H%M%S") \
-		"-- level parameter must have a value of 1 (full) or 2 (incremental)"
+        logger -p user.error -t MariaDB-Manager-Task \
+		"-- Level parameter must have a value of 1 (full) or 2 (incremental)."
 	set_error "Invalid backup level."
         exit 1
 fi
@@ -108,9 +106,9 @@ else # Backup unsuccessful
 	# Updating backup state (error)
 	./steps/backups/updatestatus.sh $BACKUPID "error"
 	set_error "Error creating backup from database."
-	echo $(date "+%Y%m%d_%H%M%S") "-- Start of failed backup log"
-	cat /tmp/backup.log.$$
-	echo End of failed backup log
+	logger -p user.error -t MariaDB-Manager-Task "Start of failed backup log:"
+	logger -p user.error -t MariaDB-Manager-Task "$(cat /tmp/backup.log.$$)"
+	logger -p user.error -t MariaDB-Manager-Task "End of failed backup log"
 	rm -f /tmp/backup.log.$$
 fi
 

@@ -29,5 +29,4 @@
 request_uri="system/$system_id/backup/$BACKUPID"
 
 api_response=$(api_call GET "$request_uri")
-export BASEBACKUPID=$(echo $api_response | sed 's|.*"backup":\[{||' | sed 's|}\]}||' | 
-	awk 'BEGIN { RS=","; FS=":"; } { gsub ("\"", "", $0); if ($1 == "parentid") print $2; }')
+export BASEBACKUPID=$(jq -r '.backup | .parentid' <<<"$api_response")

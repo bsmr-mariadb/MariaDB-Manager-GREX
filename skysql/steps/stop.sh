@@ -27,7 +27,7 @@
 
 . ./remote-scripts-config.sh
 
-echo $(date "+%Y%m%d_%H%M%S") "-- Command start: stop"
+logger -p user.info -t MariaDB-Manager-Task "Command start: stop"
 
 # Setting the state of the command to running
 api_call "PUT" "task/$taskid" "state=running"
@@ -35,16 +35,16 @@ api_call "PUT" "task/$taskid" "state=running"
 /etc/init.d/mysql stop
 stop_status=$?
 if [[ "$stop_status" != 0 ]]; then
-	echo $(date "+%Y%m%d_%H%M%S") "MariaDB stop returned failure"
+	logger -p user.error -t MariaDB-Manager-Task "MariaDB stop returned failure"
 	set_error "MariaDB stop command failed."
 	exit $stop_status
 fi
 
 $(wait_for_state "down")
 if [[ $? -eq 0 ]]; then
-	echo $(date "+%Y%m%d_%H%M%S") "-- Command finished successfully"
+	logger -p user.info -t MariaDB-Manager-Task "Command finished successfully"
 else
 	set_error "Timeout waiting for node to stop."
-	echo $(date "+%Y%m%d_%H%M%S") "-- Command finished with an error: node state not OK"
+	logger -p user.error -t MariaDB-Manager-Task "Command finished with an error: node state not OK"
 	exit 1
 fi

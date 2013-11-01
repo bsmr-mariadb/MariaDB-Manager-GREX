@@ -38,12 +38,14 @@ if [[ $# -lt 2 ]] ; then
 fi
 backupid=$1
 
-data='state='$2
-while [[ $# -gt 2 ]] ; do
-	data=${data}'&'$3
+data=( "state=$2" )
+shift 2
+while [[ $# -gt 0 ]] ; do
+	data+=("$1")
 	shift
 done
 
 request_uri="system/$system_id/backup/$backupid"
 
-api_response=$(api_call "PUT" "$request_uri" "$data")
+api_response=$(api_call "PUT" "$request_uri" "${data[@]}")
+echo $api_response > /tmp/mookie.log

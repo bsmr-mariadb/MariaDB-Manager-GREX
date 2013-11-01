@@ -46,15 +46,15 @@ fi
 
 # Building the data parameter with the API call-specific arguments
 start_date=$(date +"%Y-%m-%d %H:%M:%S")
-data="systemid=$system_id&nodeid=$node_id&level=$level&started=$start_date"
+
+data=( systemid=$system_id nodeid=$node_id level=$level started=$start_date )
 if [[ "$level" -eq 2 ]] ; then
-        data="$data&parentid=$BASEBACKUPID"
+        data+=("parentid=$BASEBACKUPID")
 fi
 
 request_uri="system/$system_id/backup"
 
-api_response=$(api_call "POST" "$request_uri" "$data")
+api_response=$(api_call "POST" "$request_uri" "${data[@]}")
 
 # Parsing API response and setting BACKUPID for the invoking script
-export BACKUPID=$(echo $api_response | sed 's|[{}]||g' | 
-	awk 'BEGIN { RS=","; FS=":" } { gsub("\"", "", $0); if ($1 == "insertkey") print $2; }')
+export BACKUPID=$(jq -r '.insertkey' <<<"$api_response")

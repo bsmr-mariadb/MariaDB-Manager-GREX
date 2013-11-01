@@ -26,7 +26,7 @@
 # accordingly.
 #
 
-echo $(date "+%Y%m%d_%H%M%S") "-- Command start: probe"
+logger -p user.info -t MariaDB-Manager-Task "Command start: probe"
 
 mysqld_found=false
 mysqld_comp=false

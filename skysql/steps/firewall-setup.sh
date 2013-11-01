@@ -26,7 +26,7 @@
 # and disables selinux or AppArmor if they are installed
 #
 
-echo "Command start: firewall-setup"
+logger -p user.info -t MariaDB-Manager-Task "Command start: firewall-setup"
 
 # Check if the iptables command is avialable
 which iptables > /dev/null 2>&1

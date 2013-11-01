@@ -68,51 +68,36 @@ fi
 
 # Getting current node system information from API
 task_json=$(api_call "GET" "task/$taskid" "fields=systemid,nodeid")
-task_fields=$(echo "$task_json" | sed 's|^{"task":{||' | sed 's|}}$||')
 
-export system_id=$(echo "$task_fields" | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "systemid") print $2; }')
-export node_id=$(echo "$task_fields" | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "nodeid") print $2; }')
+export system_id=$(jq -r '.task | .systemid' <<<"$task_json")
+export node_id=$(jq -r '.task | .nodeid' <<<"$task_json")
 
 # Getting current node DB credentials from API
 node_json=$(api_call "GET" "system/$system_id/node/$node_id" \
         "fields=name,dbusername,dbpassword,repusername,reppassword,privateip")
-node_fields=$(echo "$node_json" | sed 's|^{"node":{||' | sed 's|}}$||')
 
-export nodename=$(echo "$node_fields" | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "name") print $2; }')
-export db_username=$(echo "$node_fields" | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "dbusername") print $2; }')
-export db_password=$(echo "$node_fields" | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "dbpassword") print $2; }')
-export rep_username=$(echo "$node_fields" | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "repusername") print $2; }')
-export rep_password=$(echo "$node_fields" | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "reppassword") print $2; }')
-export privateip=$(echo "$node_fields" | awk 'BEGIN { RS=","; FS=":" } \
-        { gsub("\"", "", $0); if ($1 == "privateip") print $2; }')
+export nodename=$(jq -r '.node | .name' <<<"$node_json")
+export db_username=$(jq -r '.node | .dbusername' <<<"$node_json")
+export db_password=$(jq -r '.node | .dbpassword' <<<"$node_json")
+export rep_username=$(jq -r '.node | .repusername' <<<"$node_json")
+export rep_password=$(jq -r '.node | .reppassword' <<<"$node_json")
+export privateip=$(jq -r '.node | .privateip' <<<"$node_json")
 
 # Getting current system DB credentials from API (if undefined at node level)
 system_json=$(api_call "GET" "system/$system_id" \
         "fields=dbusername,dbpassword,repusername,reppassword")
-system_fields=$(echo "$system_json" | sed 's|^{"system":{||' | sed 's|}}$||')
 
 if [[ "$db_username" == "" ]]; then
-        export db_username=$(echo "$system_fields" | awk 'BEGIN { RS=","; FS=":" } \
-                { gsub("\"", "", $0); if ($1 == "dbusername") print $2; }')
+        export db_username=$(jq -r '.system | .dbusername' <<<"$system_json")
 fi
 if [[ "$db_password" == "" ]]; then
-        export db_password=$(echo "$system_fields" | awk 'BEGIN { RS=","; FS=":" } \
-                { gsub("\"", "", $0); if ($1 == "dbpassword") print $2; }')
+        export db_password=$(jq -r '.system | .dbpassword' <<<"$system_json")
 fi
 if [[ "$rep_username" == "" ]]; then
-        export rep_username=$(echo "$system_fields" | awk 'BEGIN { RS=","; FS=":" } \
-                { gsub("\"", "", $0); if ($1 == "repusername") print $2; }')
+        export rep_username=$(jq -r '.system | .repusername' <<<"$system_json")
 fi
 if [[ "$rep_password" == "" ]]; then
-        export rep_password=$(echo "$system_fields" | awk 'BEGIN { RS=","; FS=":" } \
-                { gsub("\"", "", $0); if ($1 == "rep_password") print $2; }')
+        export rep_password=$(jq -r '.system | .reppassword' <<<"$system_json")
 fi
 
 # Test command

@@ -28,7 +28,7 @@
 
 . ./remote-scripts-config.sh
 
-echo "INFO :" $(date "+%Y%m%d_%H%M%S") "-- Command start: isolate"
+logger -p user.info -t MariaDB-Manager-Task "Command start: isolate"
 
 # Setting the state of the command to running
 api_call "PUT" "task/$taskid" "state=running"
@@ -37,15 +37,15 @@ mysql -u $db_username -p$db_password -e "SET GLOBAL wsrep_provider=none;"
 mysql_status=$?
 if [[ $mysql_status != 0 ]]; then
 	set_error "Failed to set global wsrep_provider"
-	echo Unable to set global variable wsrep_provider
+	logger -p user.error -t MariaDB-Manager-Task "Unable to set global variable 'wsrep_provider'."
 	exit $mysql_status
 fi
 
 $(wait_for_state "isolated")
 if [[ $? -eq 0 ]]; then
-	echo "INFO :" $(date "+%Y%m%d_%H%M%S") "-- Command finished successfully"
+	logger -p user.info -t MariaDB-Manager-Task "Command finished successfully"
 else
-	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Command finished with an error: node state not OK"
+	logger -p user.error -t MariaDB-Manager-Task "Command finished with an error: node state not OK"
 	set_error "Timeout waiting for node to become isolated"
 	exit 1
 fi

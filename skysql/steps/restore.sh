@@ -32,8 +32,7 @@ if [[ $# -lt 1 ]] ; then
     exit 1
 fi
 
-echo $(date "+%Y%m%d_%H%M%S") "-- Command start: restore"
-echo $(date "+%Y%m%d_%H%M%S") "-- params: backup_id $1"
+logger -p user.info -t MariaDB-Manager-Task "Command start: restore"
 
 # Setting the state of the command to running
 api_call "PUT" "task/$taskid" "state=running"

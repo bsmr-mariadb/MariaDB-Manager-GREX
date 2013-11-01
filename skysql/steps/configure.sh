@@ -26,7 +26,7 @@
 # command execution.
 #
 
-echo $(date "+%Y%m%d_%H%M%S") "-- Command start: configure"
+logger -p user.info -t MariaDB-Manager-Task "Command start: configure"
 
 # Creating MariaDB configuration file
 hostname=$(uname -n)
