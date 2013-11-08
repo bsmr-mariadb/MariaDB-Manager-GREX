@@ -105,7 +105,7 @@ wsrep_notify_cmd=
 
 # State Snapshot Transfer method
 #wsrep_sst_method=mysqldump
-wsrep_sst_method=rsync
+wsrep_sst_method=xtrabackup
 
 # INITIAL SETUP
 # Address which donor should send State Snapshot to.
