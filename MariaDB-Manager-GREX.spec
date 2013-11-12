@@ -15,7 +15,7 @@ Release: 		%{release}
 Source: 		%{name}-%{version}-%{release}.tar.gz
 Prefix: 		/
 Group: 			Development/Tools
-Requires:		curl net-tools percona-xtrabackup jq nc
+Requires:		curl net-tools percona-xtrabackup jq nc rsync iproute grep findutils gawk
 #BuildRequires:		
 
 %description

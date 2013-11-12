@@ -27,6 +27,18 @@
 
 logger -p user.info -t MariaDB-Manager-Task "Command start: install-packages"
 
+# Installing MariaDB packages
 yum -y clean all
-yum -y install MariaDB-Galera-server MariaDB-client rsync iproute net-tools grep findutils gawk
-exit $?
+yum -y install MariaDB-Galera-server MariaDB-client
+
+# Checking if packages were correctly installed
+rpm -q MariaDB-Galera-server MariaDB-client
+rpm_q_status=$?
+
+if [[ "$rpm_q_status" != "0" ]]; then
+	set_error "Error installing MariaDB packages."
+	logger -p user.error -t MariaDB-Manager-Remote "Error installing MariaDB packages."
+	exit $rpm_q_status
+fi
+
+exit 0
