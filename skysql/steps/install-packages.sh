@@ -29,7 +29,7 @@ logger -p user.info -t MariaDB-Manager-Task "Command start: install-packages"
 
 # Installing MariaDB packages
 yum -y clean all
-yum -y install MariaDB-Galera-server MariaDB-client
+yum -y install MariaDB-Galera-server MariaDB-client --disablerepo=* --enablerepo=skysql
 
 # Checking if packages were correctly installed
 rpm -q MariaDB-Galera-server MariaDB-client
