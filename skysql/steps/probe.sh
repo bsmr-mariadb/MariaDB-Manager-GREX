@@ -55,7 +55,7 @@ if [[ $? == 0 ]]; then
 fi
 
 # Checking if port 3306 is busy
-netstat -a | egrep -is "tcp.*(3306)|(mysql).*LISTEN"
+netstat -a | egrep -is "^tcp.*(3306)|(mysql) *LISTEN"
 if [[ $? == 0 ]]; then
 	mysql_port_busy=true
 	logger -p user.info -t MariaDB-Manager-Task "Probe: A listener already exists on the MySQL port."
