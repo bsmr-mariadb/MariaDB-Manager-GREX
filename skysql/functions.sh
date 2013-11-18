@@ -91,7 +91,7 @@ api_call() {
                         msg="curl failed with exit code $curl_status"
                 esac
 
-                logger -p user.error -t MariaDB-Manager-Task "restfulapi-call: $full_url failed, $msg"
+                logger -p user.error -t MariaDB-Manager-Remote "restfulapi-call: $full_url failed, $msg"
                 exit $curl_status
         fi
 }
@@ -117,9 +117,9 @@ set_error() {
 json_error() {
 	error_text=$(jq -r '.errors' <<<"$1")
         if [[ "$error_text" != "null" ]] ; then
-                logger -p user.error -t MariaDB-Manager-Task "API call failed: $error_text"
+                logger -p user.error -t MariaDB-Manager-Remote "API call failed: $error_text"
                 if [[ "$error_text" =~ "Date header out of range" ]]; then
-                        logger -p user.error -t MariaDB-Manager-Task "Date and time on the local host must be synchronised with the API host"
+                        logger -p user.error -t MariaDB-Manager-Remote "Date and time on the local host must be synchronised with the API host"
                 fi
                 json_err=1
         else

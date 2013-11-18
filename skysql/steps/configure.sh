@@ -26,7 +26,7 @@
 # command execution.
 #
 
-logger -p user.info -t MariaDB-Manager-Task "Command start: configure"
+logger -p user.info -t MariaDB-Manager-Remote "Command start: configure"
 
 # Creating MariaDB configuration file
 hostname=$(uname -n)

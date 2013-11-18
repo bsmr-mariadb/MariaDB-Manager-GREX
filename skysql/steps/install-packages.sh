@@ -25,7 +25,7 @@
 # This script installs the necessary MariaDB/Galera packages.
 #
 
-logger -p user.info -t MariaDB-Manager-Task "Command start: install-packages"
+logger -p user.info -t MariaDB-Manager-Remote "Command start: install-packages"
 
 # Installing MariaDB packages
 yum -y clean all

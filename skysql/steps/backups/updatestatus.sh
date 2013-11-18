@@ -48,4 +48,3 @@ done
 request_uri="system/$system_id/backup/$backupid"
 
 api_response=$(api_call "PUT" "$request_uri" "${data[@]}")
-echo $api_response > /tmp/mookie.log

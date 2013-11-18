@@ -32,7 +32,7 @@ if [[ $# -lt 1 ]] ; then
     exit 1
 fi
 
-logger -p user.info -t MariaDB-Manager-Task "Command start: restore"
+logger -p user.info -t MariaDB-Manager-Remote "Command start: restore"
 
 # Setting the state of the command to running
 api_call "PUT" "task/$taskid" "state=running"

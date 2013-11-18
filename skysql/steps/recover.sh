@@ -29,7 +29,7 @@
 
 . ./remote-scripts-config.sh
 
-logger -p user.info -t MariaDB-Manager-Task "Command start: recover"
+logger -p user.info -t MariaDB-Manager-Remote "Command start: recover"
 
 # Setting the state of the command to running
 api_call "PUT" "task/$taskid" "state=running"
@@ -46,7 +46,7 @@ if [[ -n $cluster_online_ip ]]; then
 		mysql -u $db_username -p$db_password -e \
 			"SET GLOBAL wsrep_provider='/usr/lib64/galera/libgalera_smm.so';"
 	else
-		logger -p user.error -t MariaDB-Manager-Task "No Galera wsrep library found."
+		logger -p user.error -t MariaDB-Manager-Remote "No Galera wsrep library found."
 		set_error "Failed to find Galera wsrep library."
 		exit 1
 	fi
@@ -54,16 +54,16 @@ if [[ -n $cluster_online_ip ]]; then
 	mysql -u $db_username -p$db_password -e \
 		"SET GLOBAL wsrep_cluster_address='gcomm://$cluster_online_ip:4567';"
 else
-	logger -p user.error -t MariaDB-Manager-Task "No active cluster to rejoin."
+	logger -p user.error -t MariaDB-Manager-Remote "No active cluster to rejoin."
 	set_error "No active cluster to join."
 	exit 1
 fi
 
 $(wait_for_state "joined")
 if [[ $? -eq 0 ]]; then
-	logger -p user.info -t MariaDB-Manager-Task "Command finished successfully"
+	logger -p user.info -t MariaDB-Manager-Remote "Command finished successfully"
 else
-	logger -p user.error -t MariaDB-Manager-Task "Command finished with an error: node state not OK"
+	logger -p user.error -t MariaDB-Manager-Remote "Command finished with an error: node state not OK"
 	set_error "Timeout waiting for node to join the cluster."
 	exit 1
 fi

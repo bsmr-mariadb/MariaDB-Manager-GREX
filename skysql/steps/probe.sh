@@ -26,7 +26,7 @@
 # accordingly.
 #
 
-logger -p user.info -t MariaDB-Manager-Task "Command start: probe"
+logger -p user.info -t MariaDB-Manager-Remote "Command start: probe"
 
 mysqld_found=false
 mysqld_comp=false
@@ -40,7 +40,7 @@ if [[ $? == 0 ]]; then
 	mysqld_found=true
 	echo $version_output | grep "MariaDB.*wsrep"
 	if [[ $? == 0 ]]; then
-		logger -p user.info -t MariaDB-Manager-Task \
+		logger -p user.info -t MariaDB-Manager-Remote \
 			"Probe: A MySQL configuration with the Galera replicator has been detected."
 		mysqld_comp=true
 	fi	
@@ -49,7 +49,7 @@ fi
 # Checking for MariaDB/Galera installation on rpm
 rpm -qa | grep MariaDB-Galera
 if [[ $? == 0 ]]; then
-	logger -p user.info -t MariaDB-Manager-Task \
+	logger -p user.info -t MariaDB-Manager-Remote \
 		"Probe: The MariaDB-Galera RPM package is already installed."
 	rpm_installed=true
 fi
@@ -58,18 +58,18 @@ fi
 netstat -a | egrep -is "^tcp.*(3306)|(mysql) *LISTEN"
 if [[ $? == 0 ]]; then
 	mysql_port_busy=true
-	logger -p user.info -t MariaDB-Manager-Task "Probe: A listener already exists on the MySQL port."
+	logger -p user.info -t MariaDB-Manager-Remote "Probe: A listener already exists on the MySQL port."
 fi
 
 # Determining next state
 if $mysqld_found ; then
 	if $mysqld_comp ; then
 		new_state='provisioned'
-		logger -p user.info -t MariaDB-Manager-Task \
+		logger -p user.info -t MariaDB-Manager-Remote \
 			"Probe: A compatible MySQL installation detected."
 	else
 		new_state='incompatible'
-		logger -p user.info -t MariaDB-Manager-Task \
+		logger -p user.info -t MariaDB-Manager-Remote \
 			"Probe: An incompatible MySQL installation detected."
 	fi
 elif $rpm_installed ; then

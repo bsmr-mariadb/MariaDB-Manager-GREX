@@ -42,25 +42,25 @@ cd $scripts_dir
 . ./restfulapicredentials.sh
 . ./functions.sh
 
-logger -p user.info -t MariaDB-Enterprise-Remote "Task: $taskid Command: $step_script $params" 
+logger -p user.info -t MariaDB-Manager-Remote "Task: $taskid Command: $step_script $params" 
 
 # Validations
 if [[ "$step_script" == "" ]]; then
-	logger -p user.error -t MariaDB-Enterprise-Remote \
+	logger -p user.error -t MariaDB-Manager-Remote \
 			"Task: $taskid Parameter value not defined: step"
 	echo "1"
 	exit 1
 fi
 
 if [[ "$taskid" == "" ]]; then
-	logger -p user.error -t MariaDB-Enterprise-Remote \
+	logger -p user.error -t MariaDB-Manager-Remote \
 			"Task: $taskid Parameter value not defined: task id"
 	echo "1"
 	exit 1
 fi
 
 if [[ "$api_host" == "" ]]; then
-	logger -p user.error -t MariaDB-Enterprise-Remote \
+	logger -p user.error -t MariaDB-Manager-Remote \
 			"Task: $taskid Parameter value not defined: api_host"
 	echo "1"
 	exit 1
@@ -114,7 +114,7 @@ if [[ $return_status == 0 ]]; then
 else
 	pri="user.error"
 fi
-logger -p $pri -t MariaDB-Enterprise-Task -f /tmp/remote.$$.log
+logger -p $pri -t MariaDB-Manager-Task -f /tmp/remote.$$.log
 rm -f /tmp/remote.$$.log
 
 # Putting script exit code on output for the API-side to be able to read it via ssh

@@ -28,7 +28,7 @@
 
 . ./remote-scripts-config.sh
 
-logger -p user.info -t MariaDB-Manager-Task "Command start: start"
+logger -p user.info -t MariaDB-Manager-Remote "Command start: start"
 
 # Setting the state of the command to running
 api_call "PUT" "task/$taskid" "state=running"
@@ -45,16 +45,16 @@ else # Starting a new cluster
 fi
 
 if [[ $start_status != 0 ]]; then
-	logger -p user.error -t MariaDB-Manager-Task "MariaDB start returned failure."
+	logger -p user.error -t MariaDB-Manager-Remote "MariaDB start returned failure."
 	set_error "MariaDB start command failed."
 	exit $start_status
 fi
 
 $(wait_for_state "joined")
 if [[ $? -eq 0 ]]; then
-	logger -p user.info -t MariaDB-Manager-Task "Command finished successfully"
+	logger -p user.info -t MariaDB-Manager-Remote "Command finished successfully"
 else
 	set_error "Timeout waiting for node to start."
-	logger -p user.error -t MariaDB-Manager-Task "Command finished with an error: node state not OK"
+	logger -p user.error -t MariaDB-Manager-Remote "Command finished with an error: node state not OK"
 	exit 1
 fi

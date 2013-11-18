@@ -28,11 +28,11 @@
 # $1: Backup type ("Full" or "Incremental")
 # $2: Base BackupID (only required if $1 = "Incremental)
 
-logger -p user.info -t MariaDB-Manager-Task "Command start: backup"
+logger -p user.info -t MariaDB-Manager-Remote "Command start: backup"
 
 # Parameter validation
 if [[ "$1" == "" ]] ; then
-	logger -p user.error -t MariaDB-Manager-Task "$0 invoked with no parameters"
+	logger -p user.error -t MariaDB-Manager-Remote "$0 invoked with no parameters"
 	set_error "Missing parameters, backup should be called with a backup type and an optional id."
 	exit 1
 fi
@@ -44,12 +44,12 @@ elif [[ "$1" == Incremental* ]] ; then
 	if [[ $# -ge 2 ]]; then
 		export BASEBACKUPID=$2
 	else
-		logger -p user.error -t MariaDB-Manager-Task "Missing backup ID for incremental backup."
+		logger -p user.error -t MariaDB-Manager-Remote "Missing backup ID for incremental backup."
 		set_error "Missing backup ID for incremental backup."
                 exit 1
 	fi
 else
-	logger -p user.error -t MariaDB-Manager-Task "Invalid parameters for backup step."
+	logger -p user.error -t MariaDB-Manager-Remote "Invalid parameters for backup step."
 	set_error "Invalid parameters for backup step."
 	exit 1
 fi
@@ -74,7 +74,7 @@ elif [[ "$level" -eq 2 ]] ; then
 	bkstatus=$?
 	backupfilename="IncrBackup.$BACKUPID"
 else
-        logger -p user.error -t MariaDB-Manager-Task \
+        logger -p user.error -t MariaDB-Manager-Remote \
 		"-- Level parameter must have a value of 1 (full) or 2 (incremental)."
 	set_error "Invalid backup level."
         exit 1
@@ -106,9 +106,9 @@ else # Backup unsuccessful
 	# Updating backup state (error)
 	./steps/backups/updatestatus.sh $BACKUPID "error"
 	set_error "Error creating backup from database."
-	logger -p user.error -t MariaDB-Manager-Task "Start of failed backup log:"
-	logger -p user.error -t MariaDB-Manager-Task "$(cat /tmp/backup.log.$$)"
-	logger -p user.error -t MariaDB-Manager-Task "End of failed backup log"
+	logger -p user.error -t MariaDB-Manager-Remote "Start of failed backup log:"
+	logger -p user.error -t MariaDB-Manager-Remote "$(cat /tmp/backup.log.$$)"
+	logger -p user.error -t MariaDB-Manager-Remote "End of failed backup log"
 	rm -f /tmp/backup.log.$$
 fi
 
