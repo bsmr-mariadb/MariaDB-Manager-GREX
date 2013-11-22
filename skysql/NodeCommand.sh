@@ -103,7 +103,31 @@ fi
 # Test command
 if [[ "$step_script" == "test" ]]; then
         echo 0; exit
+elif [[ "$step_script" == "cancel" ]]; then
+        if [[ -f skysql.task.$taskid ]]; then
+                p_PID=$(cat skysql.task.$taskid)
+
+                # Getting command process list
+                list_PID=$p_PID
+                child_list=$(ps -o pid --ppid $p_PID --no-headers | sed -e "s/^ *//" | \
+                        tr '\n' ',' | sed -e "s/,$//")
+
+                while [ ! -z "$child_list" ]
+                do
+                        list_PID="$list_PID,$child_list"
+                        child_list=$(ps -o pid --ppid $child_list --no-headers | \
+                                sed -e "s/^ *//" | tr '\n' ',' | sed -e "s/,$//")
+                done
+
+                # Sending all processes the TERM signal
+                kill_list=$(echo $list_PID | sed -e "s/,/ /g")
+                kill -s TERM $kill_list
+
+                rm -f skysql.tasl.$taskid
+        fi
 fi
+
+echo $$ > ./skysql.task.$taskid
 
 # Executing the script corresponding to the step
 fullpath="$scripts_dir/steps/$step_script.sh $params"
@@ -116,6 +140,10 @@ else
 fi
 logger -p $pri -t MariaDB-Manager-Task -f /tmp/remote.$$.log
 rm -f /tmp/remote.$$.log
+
+if [[ -f skysql.task.$taskid ]]; then
+        rm -f skysql.tasl.$taskid
+fi
 
 # Putting script exit code on output for the API-side to be able to read it via ssh
 echo $return_status
