@@ -28,6 +28,14 @@
 
 logger -p user.info -t MariaDB-Manager-Remote "Command start: configure"
 
+trap cleanup SIGTERM
+cleanup() {
+        if [[ -f /etc/my.cnf.d/skysql-galera.cnf ]]; then
+                rm -f /etc/my.cnf.d/skysql-galera.cnf
+        fi
+        exit 1
+}
+
 # Creating MariaDB configuration file
 hostname=$(uname -n)
 sed -e "s/###NODE-ADDRESS###/$privateip/" \
