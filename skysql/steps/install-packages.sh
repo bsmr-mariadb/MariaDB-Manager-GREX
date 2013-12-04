@@ -27,7 +27,7 @@ logger -p user.info -t MariaDB-Manager-Remote "Command start: install-packages"
 
 # Installing MariaDB packages
 yum -y clean all
-yum -y install MariaDB-Galera-server MariaDB-client --disablerepo=* --enablerepo=skysql
+yum -y install MariaDB-Galera-server MariaDB-client --disablerepo=* --enablerepo=MariaDB-Manager
 
 # Checking if packages were correctly installed
 rpm -q MariaDB-Galera-server MariaDB-client
