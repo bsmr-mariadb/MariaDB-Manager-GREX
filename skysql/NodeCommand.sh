@@ -37,7 +37,10 @@ params=$@
 scripts_dir=$(dirname $0)
 cd $scripts_dir
 
-. ./restfulapicredentials.sh
+# Getting and defining API credentials
+export auth_key_number=$(awk -F ":" '{ print $1 }' credentials.ini)
+export auth_key=$(awk -F ":" '{ print $2 }' credentials.ini)
+
 . ./functions.sh
 
 logger -p user.info -t MariaDB-Manager-Remote "Task: $taskid Command: $step_script $params" 
@@ -104,6 +107,7 @@ if [[ "$step_script" == "test" ]]; then
 elif [[ "$step_script" == "cancel" ]]; then
         if [[ -f skysql.task.$taskid ]]; then
                 p_PID=$(cat skysql.task.$taskid)
+                rm -f skysql.tasl.$taskid
 
                 # Getting command process list
                 list_PID=$p_PID
@@ -120,8 +124,6 @@ elif [[ "$step_script" == "cancel" ]]; then
                 # Sending all processes the TERM signal
                 kill_list=$(echo $list_PID | sed -e "s/,/ /g")
                 kill -s TERM $kill_list
-
-                rm -f skysql.tasl.$taskid
         fi
 
 				exit 0
