@@ -28,8 +28,6 @@
 # $2 The new state for the backup
 #
 
-. ./restfulapicredentials.sh
-
 if [[ $# -lt 2 ]] ; then
 	echo $Usage: $0 '<Backup ID>' '<State>' '[size=<size>]|[storage=<path>]|[binlog=<binlog>]|[log=<Log URL>]'
 	exit
