@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #  Part of SkySQL Galera Cluster Remote Commands package
 #

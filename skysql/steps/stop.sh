@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # This file is distributed as part of the MariaDB Enterprise.  It is free
 # software: you can redistribute it and/or modify it under the terms of the
