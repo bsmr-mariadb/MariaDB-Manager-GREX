@@ -26,6 +26,8 @@
 # $1: Step to be executed
 # $2-@: Step script-specific parameters
 
+PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin
+
 log=/var/log/skysql-remote-exec.log
 
 step_script=$1

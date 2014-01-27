@@ -15,7 +15,7 @@ Release: 		%{release}
 Source: 		%{name}-%{version}-%{release}.tar.gz
 Prefix: 		/
 Group: 			Development/Tools
-Requires:		curl net-tools percona-xtrabackup jq nc rsync iproute grep findutils gawk sudo
+Requires:		yum rpm sudo chkconfig sed coreutils util-linux-ng curl net-tools percona-xtrabackup jq nc rsync iproute grep findutils gawk
 #BuildRequires:		
 
 %description

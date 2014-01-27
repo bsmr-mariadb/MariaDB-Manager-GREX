@@ -36,12 +36,24 @@ cleanup() {
         exit 1
 }
 
+# Determining path of galera library
+if [[ -f /usr/lib/galera/libgalera_smm.so ]]; then
+	galera_lib_path="/usr/lib/galera/libgalera_smm.so"
+elif [[ -f /usr/lib64/galera/libgalera_smm.so ]]; then
+	galera_lib_path="/usr/lib64/galera/libgalera_smm.so"
+else
+	logger -p user.error -t MariaDB-Manager-Remote "No Galera wsrep library found."
+	set_error "Failed to find Galera wsrep library."
+	exit 1
+fi
+
 # Creating MariaDB configuration file
 hostname=$(uname -n)
 sed -e "s/###NODE-ADDRESS###/$privateip/" \
 	-e "s/###NODE-NAME###/$nodename/" \
 	-e "s/###REP-USERNAME###/$rep_username/" \
 	-e "s/###REP-PASSWORD###/$rep_password/" \
+	-e "s/###GALERA-LIB-PATH###/$galera_lib_path/" \
 	steps/conf_files/skysql-galera.cnf > /etc/my.cnf.d/skysql-galera.cnf
 
 # Setting up MariaDB users

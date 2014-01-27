@@ -32,7 +32,7 @@ bind-address=###NODE-ADDRESS###
 # For the initial setup, wsrep should be disabled
 wsrep_provider=none
 # After initial setup, parameter should have full path to wsrep provider library
-wsrep_provider=/usr/lib64/galera/libgalera_smm.so
+wsrep_provider=###GALERA-LIB-PATH###
 
 # Provider specific configuration options
 wsrep_provider_options = "evs.keepalive_period = PT3S; evs.inactive_check_period = PT10S; evs.suspect_timeout = PT30S; evs.inactive_timeout = PT1M; evs.install_timeout = PT1M"
