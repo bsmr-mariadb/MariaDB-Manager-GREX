@@ -53,7 +53,7 @@ sed -e "s/###NODE-ADDRESS###/$privateip/" \
 	-e "s/###NODE-NAME###/$nodename/" \
 	-e "s/###REP-USERNAME###/$rep_username/" \
 	-e "s/###REP-PASSWORD###/$rep_password/" \
-	-e "s/###GALERA-LIB-PATH###/$galera_lib_path/" \
+	-e "s|###GALERA-LIB-PATH###|$galera_lib_path|" \
 	steps/conf_files/skysql-galera.cnf > /etc/my.cnf.d/skysql-galera.cnf
 
 # Setting up MariaDB users
