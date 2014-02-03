@@ -2,7 +2,6 @@
 %define name		MariaDB-Manager-GREX
 %define release		##RELEASE_TAG##
 %define version 	##VERSION_TAG##
-%define buildroot 	%{_topdir}/%{name}-%{version}-%{release}root
 %define install_path	/usr/local/sbin/
 
 BuildRoot:		%{buildroot}
