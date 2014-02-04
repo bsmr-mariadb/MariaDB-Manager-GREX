@@ -45,7 +45,7 @@ fi
 # Building the data parameter with the API call-specific arguments
 start_date=$(date +"%Y-%m-%d %H:%M:%S")
 
-data=( systemid=$system_id nodeid=$node_id level=$level started=$start_date )
+data=( systemid=$system_id nodeid=$node_id level=$level )
 if [[ "$level" -eq 2 ]] ; then
         data+=("parentid=$BASEBACKUPID")
 fi
