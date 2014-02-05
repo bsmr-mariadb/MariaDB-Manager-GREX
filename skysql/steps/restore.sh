@@ -39,7 +39,15 @@ api_call "PUT" "task/$taskid" "state=running"
 
 export BACKUPID="$1"
 
-backupfilename=$(ls -1 $backups_path | grep -s Backup.$BACKUPID\$)
+backupfilename=( "$backups_path"/*Backup."$BACKUPID" )
+if (( "${#backupfilename[@]}" == 0 )) || [[ ! -f "${backupfilename[0]}" ]] ; then 
+        logger -p user.error -t MariaDB-Manager-Remote "Target backup file not found."
+elif (( "${#backupfilename[@]}" > 1 )); then
+        logger -p user.error -t MariaDB-Manager-Remote "Multiple files found for the same backup ID: $BACKUPID"
+else
+        backupfilename="${backupfilename[0]##*/}"
+fi
+
 if [[ "$backupfilename" == Full* ]] ; then
     ./steps/backups/fullrestore.sh
 else
