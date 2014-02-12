@@ -29,6 +29,13 @@
 
 logger -p user.info -t MariaDB-Manager-Remote "Command start: recover"
 
+if [[ -z "$db_password" ]]; then
+        USEROPTIONS="--user=$db_username"
+
+else
+        USEROPTIONS="--user=$db_username --password=$db_password"
+fi
+
 # Setting the state of the command to running
 api_call "PUT" "task/$taskid" "state=running"
 
@@ -38,19 +45,16 @@ cluster_online_ip=$(get_online_node)
 if [[ -n $cluster_online_ip ]]; then
 	# Finding the Galera wsrep library
 	if [[ -f /usr/lib/galera/libgalera_smm.so ]]; then
-		mysql -u $db_username -p$db_password -e \
-			"SET GLOBAL wsrep_provider='/usr/lib/galera/libgalera_smm.so';"
+		mysql $USEROPTIONS -e "SET GLOBAL wsrep_provider='/usr/lib/galera/libgalera_smm.so';"
 	elif [[ -f /usr/lib64/galera/libgalera_smm.so ]]; then
-		mysql -u $db_username -p$db_password -e \
-			"SET GLOBAL wsrep_provider='/usr/lib64/galera/libgalera_smm.so';"
+		mysql $USEROPTIONS -e "SET GLOBAL wsrep_provider='/usr/lib64/galera/libgalera_smm.so';"
 	else
 		logger -p user.error -t MariaDB-Manager-Remote "No Galera wsrep library found."
 		set_error "Failed to find Galera wsrep library."
 		exit 1
 	fi
 
-	mysql -u $db_username -p$db_password -e \
-		"SET GLOBAL wsrep_cluster_address='gcomm://$cluster_online_ip:4567';"
+	mysql $USEROPTIONS -e "SET GLOBAL wsrep_cluster_address='gcomm://$cluster_online_ip:4567';"
 else
 	logger -p user.error -t MariaDB-Manager-Remote "No active cluster to rejoin."
 	set_error "No active cluster to join."

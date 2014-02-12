@@ -24,7 +24,12 @@
 #
 
 TMPFILE="/tmp/innobackupex-runner.$$.tmp"
-USEROPTIONS="--user=$db_username --password=$db_password"
+if [[ -z "$db_password" ]]; then
+        USEROPTIONS="--user=$db_username"
+
+else
+        USEROPTIONS="--user=$db_username --password=$db_password"
+fi
 
 # Checking if backup tool exists
 if [[ ! -x $(which innobackupex) ]]; then

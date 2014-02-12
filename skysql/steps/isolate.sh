@@ -28,10 +28,17 @@
 
 logger -p user.info -t MariaDB-Manager-Remote "Command start: isolate"
 
+if [[ -z "$db_password" ]]; then
+        USEROPTIONS="--user=$db_username"
+
+else
+        USEROPTIONS="--user=$db_username --password=$db_password"
+fi
+
 # Setting the state of the command to running
 api_call "PUT" "task/$taskid" "state=running"
 
-mysql -u $db_username -p$db_password -e "SET GLOBAL wsrep_provider=none;"
+mysql $USEROPTIONS -e "SET GLOBAL wsrep_provider=none;"
 mysql_status=$?
 if [[ $mysql_status != 0 ]]; then
 	set_error "Failed to set global wsrep_provider"

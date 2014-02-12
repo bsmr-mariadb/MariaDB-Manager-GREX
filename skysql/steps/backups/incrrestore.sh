@@ -33,7 +33,12 @@ mkdir -p "$RESTOREPATH/incr"
 mkdir -p "$RESTOREPATH/extr"
 mkdir -p "$RESTOREPATH/mysql_tmp_cp"
 
-USEROPTIONS="--user=$db_username --password=$db_password"
+if [[ -z "$db_password" ]]; then
+        USEROPTIONS="--user=$db_username"
+
+else
+        USEROPTIONS="--user=$db_username --password=$db_password"
+fi
 DATAFOLDER=$(cat $my_cnf_file | awk 'BEGIN { FS="=" } { if ($1 == "datadir") print $2 }')
 
 if [[ "$DATAFOLDER" == "" ]] ; then

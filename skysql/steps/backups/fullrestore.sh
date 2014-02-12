@@ -37,7 +37,12 @@ fi
 mkdir -p "$RESTOREPATH/extr"
 mkdir -p "$RESTOREPATH/mysql_tmp_cp"
 
-USEROPTIONS="--user=$db_username --password=$db_password"
+if [[ -z "$db_password" ]]; then
+        USEROPTIONS="--user=$db_username"
+
+else
+        USEROPTIONS="--user=$db_username --password=$db_password"
+fi
 
 # Checking if the script can access the database
 if ! $(echo 'exit' | /usr/bin/mysql -s $USEROPTIONS) ; then
