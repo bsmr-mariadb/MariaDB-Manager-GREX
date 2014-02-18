@@ -49,10 +49,16 @@ else
 fi
 
 if [[ "$backupfilename" == Full* ]] ; then
-    ./steps/backups/fullrestore.sh
+   ./steps/backups/fullrestore.sh
+   restorestatus=$?
 else
    ./steps/backups/incrrestore.sh
+   restorestatus=$?
 fi
 
-rststatus=$?
-exit $rststatus
+time=$(date +%s)
+if [[ "$restorestatus" -eq 0 ]]; then
+    ./steps/backups/updatestatus.sh "$BACKUPID" "done" restored="@$time"
+fi
+
+exit $restorestatus
