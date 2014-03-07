@@ -23,33 +23,44 @@
 # This script is executed by NodeCommand.sh to start the backup process.
 #
 # Parameters:
-# $1: Backup type ("Full" or "Incremental")
-# $2: Base BackupID (only required if $1 = "Incremental)
+# type: Backup type: 1 (Full) or 2 (Incremental)
+# parent: Base BackupID (only required if type = 2)
 
 logger -p user.info -t MariaDB-Manager-Remote "Command start: backup"
 
-# Parameter validation
-if [[ "$1" == "" ]] ; then
-	logger -p user.error -t MariaDB-Manager-Remote "$0 invoked with no parameters"
-	set_error "Missing parameters, backup should be called with a backup type and an optional id."
-	exit 1
-fi
+# Parameter parsing and validation
+set $params
+while [[ $# > 0 ]]; do
+        param_name="${1%%=*}"
+        param_value="${1#*=}"
 
-if [[ "$1" == "Full" ]] ; then
-	level=1
-elif [[ "$1" == Incremental* ]] ; then
-	level=2
-	if [[ $# -ge 2 ]]; then
-		export BASEBACKUPID=$2
-	else
-		logger -p user.error -t MariaDB-Manager-Remote "Missing backup ID for incremental backup."
-		set_error "Missing backup ID for incremental backup."
+        if [[ "$param_name" == "type" ]]; then
+                level="$param_value"
+        fi
+        if [[ "$param_name" == "parent" ]]; then
+                parent="$param_value"
+        fi
+
+        shift
+done
+
+if [[ -z "$level" ]] ; then
+        logger -p user.error -t MariaDB-Manager-Remote "$0 invoked with no backup type parameter"
+        set_error "Required 'type' parameter missing."
+        exit 1
+fi
+if [[ "$level" -eq 2 ]]; then
+        if [[ -z "$parent" ]] ; then
+                logger -p user.error -t MariaDB-Manager-Remote "Missing parent backup ID for incremental backup."
+                set_error "Missing parent backup ID for incremental backup."
                 exit 1
-	fi
-else
-	logger -p user.error -t MariaDB-Manager-Remote "Invalid parameters for backup step."
-	set_error "Invalid parameters for backup step."
-	exit 1
+        else
+                export BASEBACKUPID="$parent"
+        fi
+elif [[ "$level" -ne 1 ]]; then
+        logger -p user.error -t MariaDB-Manager-Remote "Invalid backup type value for backup step."
+        set_error "Invalid value for parameter 'type'."
+        exit 1
 fi
 
 # Setting the state of the command to running
@@ -71,11 +82,6 @@ elif [[ "$level" -eq 2 ]] ; then
 	./steps/backups/incrbackup.sh > /tmp/backup.log.$$
 	bkstatus=$?
 	backupfilename="IncrBackup.$BACKUPID"
-else
-        logger -p user.error -t MariaDB-Manager-Remote \
-		"-- Level parameter must have a value of 1 (full) or 2 (incremental)."
-	set_error "Invalid backup level."
-        exit 1
 fi
 
 binlogpos=$(grep binlog /tmp/backup.log.$$ | awk '{ printf("%s%s\n", $6, $8); }' | sed -e s/\'//g)

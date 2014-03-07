@@ -23,21 +23,35 @@
 # This script is executed by NodeCommand.sh to start the restore process.
 #
 # Parameters:
-# $1: Backup ID
-
-if [[ $# -lt 1 ]] ; then
-    echo $(date "+%Y%m%d_%H%M%S") "-- Usage: $0 '<backup id>'"
-    exit 1
-fi
+# id: Backup ID
 
 logger -p user.info -t MariaDB-Manager-Remote "Command start: restore"
+
+# Parameter parsing and validation
+set $params
+while [[ $# > 0 ]]; do
+        param_name="${1%%=*}"
+        param_value="${1#*=}"
+
+        if [[ "$param_name" == "id" ]]; then
+                id="$param_value"
+        fi
+
+        shift
+done
+
+if [[ -z "$id" ]] ; then
+        logger -p user.error -t MariaDB-Manager-Remote "$0 invoked with no backup id parameter"
+        set_error "Required 'id' parameter missing."
+        exit 1
+fi
 
 # Setting the state of the command to running
 api_call "PUT" "task/$taskid" "state=running"
 
 . ./mysql-config.sh
 
-export BACKUPID="$1"
+export BACKUPID="$id"
 
 backupfilename=( "$backups_path"/*Backup."$BACKUPID" )
 if (( "${#backupfilename[@]}" == 0 )) || [[ ! -f "${backupfilename[0]}" ]] ; then 
