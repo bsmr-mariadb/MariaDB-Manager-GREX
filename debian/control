@@ -1,0 +1,16 @@
+Source: mariadb-manager-grex
+Maintainer: Marcos 
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9)
+
+Package: mariadb-manager-grex
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: MariaDB Manager Database Node Agent
+ MariaDB Manager is a tool to manage and monitor a set of MariaDB
+ servers using the Galera multi-master replication form Codership.
+ As part of the management infrastructure a set of agent scripts are
+ installed on each of the database nodes.
+
