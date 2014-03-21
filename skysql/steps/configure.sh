@@ -50,11 +50,17 @@ fi
 # Creating MariaDB configuration file
 hostname=$(uname -n)
 sed -e "s/###NODE-ADDRESS###/$privateip/" \
-	-e "s/###NODE-NAME###/$nodename/" \
+	-e "s|###NODE-NAME###|${nodename//|/\/}|" \
 	-e "s/###REP-USERNAME###/$rep_username/" \
 	-e "s/###REP-PASSWORD###/$rep_password/" \
 	-e "s|###GALERA-LIB-PATH###|$galera_lib_path|" \
 	steps/conf_files/skysql-galera.cnf > /etc/my.cnf.d/skysql-galera.cnf
+
+if [[ ! -s /etc/my.cnf.d/skysql-galera.cnf ]]; then
+	logger -p user.error -t MariaDB-Manager-Remote "Error generating galera configuration file."
+        set_error "Error generating galera configuration file"
+        exit 1
+fi
 
 # Setting up MariaDB users
 /etc/init.d/mysql start
@@ -73,10 +79,17 @@ my_cnf_path=$(whereis my.cnf | awk 'END { if (NF >= 2) print $2; }')
 if [[ my_cnf_path != "" ]]; then
         sed -e "s|export my_cnf_file=.*|export my_cnf_file=\"$my_cnf_path\"|" \
                 mysql-config.sh > /tmp/mysql-config.sh.tmp
+
         mv /tmp/mysql-config.sh.tmp mysql-config.sh
 else
         my_cnf_path=$(cat mysql-config.sh | \
                 awk 'BEGIN { FS="=" } { gsub("\"", "", $2); if ($1 == "export my_cnf_file") print $2 }')
+fi
+
+if [[ ! -s mysql-config.sh ]]; then
+	logger -p user.error -t MariaDB-Manager-Remote "Error generating mysql-config.sh configuration file."
+	set_error "Error generating mysql-config.sh configuration file"
+	exit 1
 fi
 
 cat /etc/my.cnf | grep -q ^datadir=.*
