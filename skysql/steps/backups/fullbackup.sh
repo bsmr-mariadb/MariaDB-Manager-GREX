@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# This file is distributed as part of the MariaDB Enterprise.  It is free
+# This file is distributed as part of MariaDB Manager.  It is free
 # software: you can redistribute it and/or modify it under the terms of the
 # GNU General Public License as published by the Free Software Foundation,
 # version 2.
@@ -14,7 +14,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# Copyright 2012-2014 SkySQL Ab
+# Copyright 2012-2014 SkySQL Corporation Ab
 #
 # Author: Marcos Amaral
 # Date: July 2013
@@ -25,6 +25,7 @@
 
 # Creating the backup directory if it does not exist
 mkdir -p "$backups_path"
+chown skysqlagent.skysqlagent "$backups_path"
 
 TMPFILE="/tmp/innobackupex-runner.$$.tmp"
 if [[ -z "$db_password" ]]; then
@@ -47,7 +48,7 @@ if ! $(echo 'exit' | /usr/bin/mysql -s $USEROPTIONS) ; then
 fi
 
 # Generating the backup file
-innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --stream=tar ./ > "$backups_path/FullBackup.$BACKUPID" 2> $TMPFILE
+innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --stream=tar ./ > "$backups_path/$backup_filename" 2> $TMPFILE
 
 if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
 	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- $INNOBACKUPEX failed:"; echo

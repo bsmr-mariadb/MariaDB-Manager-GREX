@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# This file is distributed as part of the MariaDB Enterprise.  It is free
+# This file is distributed as part of MariaDB Manager.  It is free
 # software: you can redistribute it and/or modify it under the terms of the
 # GNU General Public License as published by the Free Software Foundation,
 # version 2.
@@ -14,7 +14,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# Copyright 2012-2014 SkySQL Ab
+# Copyright 2012-2014 SkySQL Corporation Ab
 #
 # Author: Marcos Amaral
 # Date: July 2013
@@ -63,14 +63,23 @@ api_call "PUT" "task/$taskid" "state=running"
 # Setting the backup state to 'scheduled'
 ./steps/backups/updatestatus.sh "$BACKUPID" "scheduled"
 
+filename="bkp_${BACKUPID}_sys_${system_id}_node_${node_id}"
+
+if [[ "$level" -eq 2 ]] ; then
+	filename="${filename}_parent_${BASEBACKUPID}"
+fi
+
+time=$(date +"%Y_%m_%d_%H_%M")
+filename="${filename}_t_${time}"
+export backup_filename="$filename.bkp"
+log_filename="$filename.log"
+
 if [[ "$level" -eq 1 ]] ; then
 	./steps/backups/fullbackup.sh > /tmp/backup.log.$$
 	bkstatus=$?
-	backupfilename="FullBackup.$BACKUPID"
 elif [[ "$level" -eq 2 ]] ; then
 	./steps/backups/incrbackup.sh > /tmp/backup.log.$$
 	bkstatus=$?
-	backupfilename="IncrBackup.$BACKUPID"
 else
         logger -p user.error -t MariaDB-Manager-Remote \
 		"-- Level parameter must have a value of 1 (full) or 2 (incremental)."
@@ -78,28 +87,29 @@ else
         exit 1
 fi
 
-binlogpos=$(grep binlog /tmp/backup.log.$$ | awk '{ printf("%s%s\n", $6, $8); }' | sed -e s/\'//g)
-size=$(du -k "$backups_path/$backupfilename" | awk '{ print $1 }')
+#binlogpos=$(grep binlog /tmp/backup.log.$$ | awk '{ printf("%s%s\n", $6, $8); }' | sed -e s/\'//g)
+incr_lsn=$(grep 'latest check point (for incremental):' /tmp/backup.log.$$ | awk '{ printf("%s\n", $8); }' | sed -e s/\'//g)
+size=$(du -k "$backups_path/$backup_filename" | awk '{ print $1 }')
 
 if [[ "$bkstatus" -eq 0 ]] ; then # Backup successful
 	# Updating backup state (completed) and other data on the DB
 	if [[ "$level" -eq 1 ]] ; then
 		./steps/backups/updatestatus.sh "$BACKUPID" "done" \
 			size="$size" \
-			storage="$backups_path/$backupfilename" \
-			binlog="$binlogpos" \
-			log="$backups_path/Log.$BACKUPID"
+			backupurl="$filename" \
+			binlog="$incr_lsn" \
+			log="$log_filename"
 	elif [[ "$level" -eq 2 ]] ; then
 		./steps/backups/updatestatus.sh "$BACKUPID" "done" \
 			size="$size" \
-                        log="$backups_path/Log.$BACKUPID" \
-			parent="$BASEBACKUPID" \
-                        storage="$backups_path/$backupfilename" \
-                        binlog="$binlogpos"
+                        backupurl="$filename" \
+                        binlog="$incr_lsn" \
+			log="$log_filename" \
+			parent="$BASEBACKUPID"
 	fi
 
 	# Putting the log in place
-	mv /tmp/backup.log.$$ "$backups_path/Log.$BACKUPID"
+	mv /tmp/backup.log.$$ "$backups_path/$log_filename"
 else # Backup unsuccessful
 	# Updating backup state (error)
 	./steps/backups/updatestatus.sh $BACKUPID "error"
@@ -109,6 +119,13 @@ else # Backup unsuccessful
 	logger -p user.error -t MariaDB-Manager-Remote "End of failed backup log"
 	rm -f /tmp/backup.log.$$
 fi
+
+cur=$(pwd)
+cd "$backups_path"
+tar czvf "${filename}.tgz" "${backup_filename}" "${log_filename}"
+rm -f "${backup_filename}" "${log_filename}"
+chown skysqlagent.skysqlagent "${filename}.tgz"
+cd $cur
 
 # Returning unix return code
 exit $bkstatus

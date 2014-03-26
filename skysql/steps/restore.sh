@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# This file is distributed as part of the MariaDB Enterprise.  It is free
+# This file is distributed as part of MariaDB Manager.  It is free
 # software: you can redistribute it and/or modify it under the terms of the
 # GNU General Public License as published by the Free Software Foundation,
 # version 2.
@@ -14,7 +14,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# Copyright 2012-2014 SkySQL Ab
+# Copyright 2012-2014 SkySQL Corporation Ab
 #
 # Author: Marcos Amaral
 # Date: July 2013
@@ -39,16 +39,10 @@ api_call "PUT" "task/$taskid" "state=running"
 
 export BACKUPID="$1"
 
-backupfilename=( "$backups_path"/*Backup."$BACKUPID" )
-if (( "${#backupfilename[@]}" == 0 )) || [[ ! -f "${backupfilename[0]}" ]] ; then 
-        logger -p user.error -t MariaDB-Manager-Remote "Target backup file not found."
-elif (( "${#backupfilename[@]}" > 1 )); then
-        logger -p user.error -t MariaDB-Manager-Remote "Multiple files found for the same backup ID: $BACKUPID"
-else
-        backupfilename="${backupfilename[0]##*/}"
-fi
+backup_json=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fields=level")
+level=$(jq -r '.backup | .level' <<<"$backup_json")
 
-if [[ "$backupfilename" == Full* ]] ; then
+if [[ "$level" == "1" ]] ; then
    ./steps/backups/fullrestore.sh
    restorestatus=$?
 else
