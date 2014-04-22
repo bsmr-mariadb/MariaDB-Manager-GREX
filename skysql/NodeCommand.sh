@@ -70,38 +70,32 @@ if [[ "$api_host" == "" ]]; then
 fi
 
 # Getting current node system information from API
-task_json=$(api_call "GET" "task/$taskid" "fields=systemid,nodeid")
-
-export system_id=$(jq -r '.task | .systemid' <<<"$task_json")
-export node_id=$(jq -r '.task | .nodeid' <<<"$task_json")
+export system_id=$(api_call "GET" "task/${taskid}" "fieldselect=task~systemid")
+export node_id=$(api_call "GET" "task/${taskid}" "fieldselect=task~nodeid")
 
 # Getting current node DB credentials from API
-node_json=$(api_call "GET" "system/$system_id/node/$node_id" \
-        "fields=name,dbusername,dbpassword,repusername,reppassword,privateip")
-
-export nodename=$(jq -r '.node | .name' <<<"$node_json")
-export db_username=$(jq -r '.node | .dbusername' <<<"$node_json")
-export db_password=$(jq -r '.node | .dbpassword' <<<"$node_json")
-export rep_username=$(jq -r '.node | .repusername' <<<"$node_json")
-export rep_password=$(jq -r '.node | .reppassword' <<<"$node_json")
-export privateip=$(jq -r '.node | .privateip' <<<"$node_json")
+export nodename=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~name")
+export db_username=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~dbusername")
+export db_password=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~dbpassword")
+export rep_username=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~repusername")
+export rep_password=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~reppassword")
+export privateip=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~privateip")
 
 # Getting current system DB credentials from API (if undefined at node level)
-system_json=$(api_call "GET" "system/$system_id" \
-        "fields=dbusername,dbpassword,repusername,reppassword")
-
 if [[ "$db_username" == "" ]]; then
-        export db_username=$(jq -r '.system | .dbusername' <<<"$system_json")
+        export db_username=$(api_call "GET" "system/$system_id" "fieldselect=system~dbusername")
 fi
 if [[ "$db_password" == "" ]]; then
-        export db_password=$(jq -r '.system | .dbpassword' <<<"$system_json")
+        export db_password=$(api_call "GET" "system/$system_id" "fieldselect=system~dbpassword")
 fi
 if [[ "$rep_username" == "" ]]; then
-        export rep_username=$(jq -r '.system | .repusername' <<<"$system_json")
+        export rep_username=$(api_call "GET" "system/$system_id" "fieldselect=system~repusername")
 fi
 if [[ "$rep_password" == "" ]]; then
-        export rep_password=$(jq -r '.system | .reppassword' <<<"$system_json")
+        export rep_password=$(api_call "GET" "system/$system_id" "fieldselect=system~reppassword")
 fi
+
+export linux_name=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~linuxname")
 
 # Test command
 if [[ "$step_script" == "test" ]]; then
@@ -135,7 +129,7 @@ echo $$ > ./skysql.task.$taskid
 
 # Executing the script corresponding to the step
 fullpath="$scripts_dir/steps/$step_script.sh $params"
-sh $fullpath            > /tmp/remote.$$.log 2>&1
+bash $fullpath            > /tmp/remote.$$.log 2>&1
 return_status=$?
 if [[ $return_status == 0 ]]; then
 	pri="user.info"

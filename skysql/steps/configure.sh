@@ -100,7 +100,11 @@ else
 fi
 
 # Disabling mysqld auto startup on boot
-chkconfig --del mysql
+if [[ "$linux_name" == "CentOS" ]]; then
+	chkconfig --del mysql
+elif [[ [[ "$linux_name" == "Debian" ]]; then
+	update-rc.d -f mysql remove
+fi
 
 # Updating node state
 state_json=$(api_call "PUT" "system/$system_id/node/$node_id" "state=provisioned")
@@ -109,9 +113,9 @@ if [[ $? != 0 ]] ; then
 	logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to provisioned"
 	exit 1
 fi
-json_error "$state_json"
-if [[ "$json_err" != "0" ]]; then
-	set_error "Failed to set the node state to provisioned"
-        logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to provisioned"
-        exit 1
-fi
+#json_error "$state_json"
+#if [[ "$json_err" != "0" ]]; then
+#	set_error "Failed to set the node state to provisioned"
+#        logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to provisioned"
+#        exit 1
+#fi

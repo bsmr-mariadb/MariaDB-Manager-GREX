@@ -44,12 +44,21 @@ if [[ $? == 0 ]]; then
 	fi	
 fi
 
-# Checking for MariaDB/Galera installation on rpm
-rpm -qa | grep MariaDB-Galera
-if [[ $? == 0 ]]; then
-	logger -p user.info -t MariaDB-Manager-Remote \
-		"Probe: The MariaDB-Galera RPM package is already installed."
-	rpm_installed=true
+# Checking for MariaDB/Galera installation on package management
+if [[ "$linux_name" == "CentOS" ]]; then
+        rpm -qa | grep MariaDB-Galera
+        if [[ $? == 0 ]]; then
+                logger -p user.info -t MariaDB-Manager-Remote \
+                        "Probe: The MariaDB-Galera RPM package is already installed."
+                package_installed=true
+        fi
+elif [[ "$linux_name" == "Debian" ]]; then
+        dpkg -s mariadb-galera-server
+        if [[ $? == 0 ]]; then
+                logger -p user.info -t MariaDB-Manager-Remote \
+                        "Probe: The MariaDB-Galera DEB package is already installed."
+                package_installed=true
+        fi
 fi
 
 # Checking if port 3306 is busy
@@ -70,7 +79,7 @@ if $mysqld_found ; then
 		logger -p user.info -t MariaDB-Manager-Remote \
 			"Probe: An incompatible MySQL installation detected."
 	fi
-elif $rpm_installed ; then
+elif $package_installed ; then
 	new_state='provisioned'
 elif $mysql_port_busy ; then
 	new_state='incompatible'
@@ -83,9 +92,9 @@ if [[ $? != 0 ]] ; then
         logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to $new_state."
         exit 1
 fi
-json_error "$state_json"
-if [[ "$json_err" != "0" ]]; then
-        set_error "Failed to set the node state to $new_state."
-        logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to $new_state."
-        exit 1
-fi
+#json_error "$state_json"
+#if [[ "$json_err" != "0" ]]; then
+#        set_error "Failed to set the node state to $new_state."
+#        logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to $new_state."
+#        exit 1
+#fi
