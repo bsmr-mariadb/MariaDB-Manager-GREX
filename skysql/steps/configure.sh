@@ -47,17 +47,33 @@ fi
 
 # Creating MariaDB configuration file
 hostname=$(uname -n)
-sed -e "s/###NODE-ADDRESS###/$privateip/" \
-	-e "s|###NODE-NAME###|${nodename//|/\/}|" \
-	-e "s/###REP-USERNAME###/$rep_username/" \
-	-e "s/###REP-PASSWORD###/$rep_password/" \
-	-e "s|###GALERA-LIB-PATH###|$galera_lib_path|" \
-	steps/conf_files/skysql-galera.cnf > /etc/my.cnf.d/skysql-galera.cnf
+if [[ "$linux_name" == "CentOS" ]]; then
+        sed -e "s/###NODE-ADDRESS###/$privateip/" \
+                -e "s/###NODE-NAME###/$nodename/" \
+                -e "s/###REP-USERNAME###/$rep_username/" \
+                -e "s/###REP-PASSWORD###/$rep_password/" \
+                -e "s|###GALERA-LIB-PATH###|$galera_lib_path|" \
+                steps/conf_files/skysql-galera.cnf > /etc/my.cnf.d/skysql-galera.cnf
 
-if [[ ! -s /etc/my.cnf.d/skysql-galera.cnf ]]; then
-	logger -p user.error -t MariaDB-Manager-Remote "Error generating galera configuration file."
-        set_error "Error generating galera configuration file"
-        exit 1
+	if [[ ! -s /etc/my.cnf.d/skysql-galera.cnf ]]; then
+        	logger -p user.error -t MariaDB-Manager-Remote "Error generating galera configuration file."
+	        set_error "Error generating galera configuration file"
+        	exit 1
+	fi
+elif [[ "$linux_name" == "Debian" ]]; then
+        echo "!includedir /etc/mysql/conf.d/" > /etc/mysql/my.cnf
+        sed -e "s/###NODE-ADDRESS###/$privateip/" \
+                -e "s/###NODE-NAME###/$nodename/" \
+                -e "s/###REP-USERNAME###/$rep_username/" \
+                -e "s/###REP-PASSWORD###/$rep_password/" \
+                -e "s|###GALERA-LIB-PATH###|$galera_lib_path|" \
+                steps/conf_files/skysql-galera.cnf > /etc/mysql/conf.d/skysql-galera.cnf
+
+	if [[ ! -s /etc/mysql/conf.d/skysql-galera.cnf ]]; then
+	        logger -p user.error -t MariaDB-Manager-Remote "Error generating galera configuration file."
+        	set_error "Error generating galera configuration file"
+	        exit 1
+	fi
 fi
 
 # Setting up MariaDB users
@@ -72,8 +88,12 @@ FLUSH PRIVILEGES;"
 
 /etc/init.d/mysql stop
 
-# Configuring datadir in my.cnf (using hardcoded dir /var/lib/mysql)
-my_cnf_path=$(whereis my.cnf | awk 'END { if (NF >= 2) print $2; }')
+if [[ "$linux_name" == "CentOS" ]]; then
+        my_cnf_path="/etc/my.cnf"
+elif [[ "$linux_name" == "Debian" ]]; then
+        my_cnf_path="/etc/mysql/my.cnf"
+fi
+
 if [[ my_cnf_path != "" ]]; then
         sed -e "s|export my_cnf_file=.*|export my_cnf_file=\"$my_cnf_path\"|" \
                 mysql-config.sh > /tmp/mysql-config.sh.tmp
@@ -90,7 +110,7 @@ if [[ ! -s mysql-config.sh ]]; then
 	exit 1
 fi
 
-cat /etc/my.cnf | grep -q ^datadir=.*
+cat $my_cnf_path | grep -q ^datadir=.*
 if [[ $? = 0 ]]; then
         sed -e "s|datadir=.*|datadir=/var/lib/mysql|" $my_cnf_path > /tmp/my.cnf.tmp
         mv /tmp/my.cnf.tmp $my_cnf_path

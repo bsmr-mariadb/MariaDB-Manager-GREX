@@ -132,7 +132,7 @@ get_online_node() {
  	if [[ "$nodes_return" == "" ]]; then
  		echo "null"
  	else
- 		echo "todo"
+		echo $(api_call "GET" "system/$system_id/node" "fieldselect=nodes~0~privateip" "state=joined")
  	fi
 }
 
