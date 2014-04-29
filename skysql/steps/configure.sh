@@ -122,7 +122,7 @@ fi
 # Disabling mysqld auto startup on boot
 if [[ "$linux_name" == "CentOS" ]]; then
 	chkconfig --del mysql
-elif [[ [[ "$linux_name" == "Debian" ]]; then
+elif [[ "$linux_name" == "Debian" ]]; then
 	update-rc.d -f mysql remove
 fi
 
