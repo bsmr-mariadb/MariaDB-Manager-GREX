@@ -128,7 +128,7 @@ json_error() {
 # get_online_node
 # Returns a reference (IP) to an online node on the cluster.
 get_online_node() {
-	nodes_return=$(api_call "GET" "system/$system_id/node" "fieldselect=nodes~0~privateip "state=joined")
+	nodes_return=$(api_call "GET" "system/$system_id/node" "fieldselect=nodes~0~privateip" "state=joined")
  	if [[ "$nodes_return" =~ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3} ]]; then
  		echo "$nodes_return"
  	else
