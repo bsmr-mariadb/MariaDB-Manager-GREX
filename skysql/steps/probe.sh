@@ -69,8 +69,8 @@ if [[ $? == 0 ]]; then
 fi
 
 # Determining next state
-if $mysqld_found ; then
-	if $mysqld_comp ; then
+if [[ "xtrue" == "x$mysqld_found" ]] ; then
+	if [[ "xtrue" == "x$mysqld_comp" ]] ; then
 		new_state='provisioned'
 		logger -p user.info -t MariaDB-Manager-Remote \
 			"Probe: A compatible MySQL installation detected."
@@ -79,9 +79,9 @@ if $mysqld_found ; then
 		logger -p user.info -t MariaDB-Manager-Remote \
 			"Probe: An incompatible MySQL installation detected."
 	fi
-elif $package_installed ; then
+elif [[ "xtrue" == "x$package_installed" ]] ; then
 	new_state='provisioned'
-elif $mysql_port_busy ; then
+elif [[ "xtrue" == "x$mysql_port_busy" ]] ; then
 	new_state='incompatible'
 fi
 
