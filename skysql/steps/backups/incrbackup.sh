@@ -44,7 +44,7 @@ if ! $(echo 'exit' | /usr/bin/mysql -s $USEROPTIONS) ; then
 fi
 
 # Getting the position for the base backup
-INCRLSN=$(jq -r '.backup | .binlog' <<<"$backup_json")
+INCRLSN=$BASEBACKUPID
 #INCRLSN=$(grep 'latest check point (for incremental):' "$backups_path/Log." | awk '{ printf("%s\n", $8); }' | sed -e s/\'//g)
 
 # Generating the backup file
