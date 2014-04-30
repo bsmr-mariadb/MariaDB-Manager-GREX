@@ -52,7 +52,7 @@ fi
 
 request_uri="system/$system_id/backup"
 
-api_response=$(api_call "POST" "$request_uri" "${data[@]}")
+api_response=$(api_call "POST" "$request_uri" "${data[@]}" "fieldselect=insertkey")
 
 # Parsing API response and setting BACKUPID for the invoking script
-export BACKUPID=$(jq -r '.insertkey' <<<"$api_response")
+export BACKUPID=$api_response
