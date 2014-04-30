@@ -75,7 +75,7 @@ prepareapply() {
 	innobackupex $USEROPTIONS --defaults-file "$my_cnf_file" --apply-log --redo-only "$RESTOREPATH/extr" &> $TMPFILE
 	if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
 		echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "Restore failed (stage 'preparing the backup'):"; echo
-		echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
+		echo "---------- ERROR OUTPUT from innobackupex ----------"
 		cat $TMPFILE
 		rm -f $TMPFILE
 		exit 1
@@ -151,7 +151,7 @@ getbackups
 
 if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
 	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Restore failed - stage 'preparing the backup':"; 
-	echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
+	echo "---------- ERROR OUTPUT from innobackupex ----------"
 	cat $TMPFILE
 	rm -f $TMPFILE
 	exit 1
@@ -178,7 +178,7 @@ chown -R mysql:mysql "$DATAFOLDER"
 
 if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
 	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Restore failed - stage 'copyback backup':"; 
-	echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
+	echo "---------- ERROR OUTPUT from innobackupex ----------"
 
 	cat $TMPFILE
 	rm -f $TMPFILE

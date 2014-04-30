@@ -87,7 +87,7 @@ innobackupex $USEROPTIONS --defaults-file "$my_cnf_file" --apply-log "$RESTOREPA
 
 if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
 	echo "Restore failed (stage 'preparing the backup'):"; echo
-	echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
+	echo "---------- ERROR OUTPUT from innobackupex ----------"
 	cat $TMPFILE
 	rm -f $TMPFILE
 	exit 1
@@ -118,7 +118,7 @@ innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --copy-back "$RESTOREPA
 
 if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
 	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- Restore failed (stage 'copyback backup'):"; echo
-	echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
+	echo "---------- ERROR OUTPUT from innobackupex ----------"
 
 	cat $TMPFILE
 	rm -f $TMPFILE

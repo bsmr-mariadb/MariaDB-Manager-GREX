@@ -51,8 +51,8 @@ fi
 innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --stream=tar ./ > "$backups_path/$backup_filename" 2> $TMPFILE
 
 if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
-	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- $INNOBACKUPEX failed:"; echo
-	echo "---------- ERROR OUTPUT from $INNOBACKUPEX ----------"
+	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- innobackupex failed:"; echo
+	echo "---------- ERROR OUTPUT from innobackupex ----------"
 	cat $TMPFILE
 	rm -f $TMPFILE
 	exit 1
