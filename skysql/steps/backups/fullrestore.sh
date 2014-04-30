@@ -57,8 +57,7 @@ rm -rf "$RESTOREPATH/extr"
 mkdir -p "$RESTOREPATH/extr"
 
 # Getting backup filename
-backup_json=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fields=backupurl")
-filename=$(jq -r '.backup | .backupurl' <<<"$backup_json")
+filename=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fieldselect=backup~backupurl")
 
 if [[ ! -f "${backups_path}/${filename}.tgz" ]]; then
 	logger -p user.error -t MariaDB-Manager-Remote "Target backup file not found."

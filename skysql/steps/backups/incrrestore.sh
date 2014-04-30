@@ -108,10 +108,9 @@ getbackups() {
 	
 	while [[ "$BACKUPID" != "0" ]]; do
 		# Getting backup info
-		backup_json=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fields=backupurl,level,parentid")
-		filename=$(jq -r '.backup | .backupurl' <<<"$backup_json")
-		level=$(jq -r '.backup | .level' <<<"$backup_json")
-		parent_id=$(jq -r '.backup | .parentid' <<<"$backup_json")
+		filename=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fieldselect=backup~backupurl")
+		level=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fieldselect=backup~level")
+		parent_id=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fieldselect=backup~parentid")
 	
 		if [[ ! -f "${backups_path}/${filename}.tgz" ]]; then
         		logger -p user.error -t MariaDB-Manager-Remote "Target backup file not found."

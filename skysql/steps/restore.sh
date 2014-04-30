@@ -53,8 +53,7 @@ api_call "PUT" "task/$taskid" "state=running"
 
 export BACKUPID="$id"
 
-backup_json=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fields=level")
-level=$(jq -r '.backup | .level' <<<"$backup_json")
+level=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fieldselect=backup~level")
 
 if [[ "$level" == "1" ]] ; then
    ./steps/backups/fullrestore.sh
