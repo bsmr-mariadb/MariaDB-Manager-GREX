@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# This file is distributed as part of the MariaDB Enterprise.  It is free
+# This file is distributed as part of MariaDB Manager.  It is free
 # software: you can redistribute it and/or modify it under the terms of the
 # GNU General Public License as published by the Free Software Foundation,
 # version 2.
@@ -14,7 +14,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# Copyright 2012-2014 SkySQL Ab
+# Copyright 2012-2014 SkySQL Corporation Ab
 #
 # Author: Marcos Amaral
 # Date: July 2013
@@ -56,10 +56,30 @@ mkdir -p "$RESTOREPATH"/mysql_tmp_cp
 rm -rf "$RESTOREPATH/extr"
 mkdir -p "$RESTOREPATH/extr"
 
+# Getting backup filename
+backup_json=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fields=backupurl")
+filename=$(jq -r '.backup | .backupurl' <<<"$backup_json")
+
+if [[ ! -f "${backups_path}/${filename}.tgz" ]]; then
+	logger -p user.error -t MariaDB-Manager-Remote "Target backup file not found."
+	exit 1
+fi
+
+# Extracting compressed backup file
+cur=$(pwd)
+cd "$backups_path"
+tar_output=$(tar xzvf "${filename}.tgz")
+tar_exit_code=$?
+if [[ "$tar_exit_code" != "0" ]]; then
+	logger -p user.error -t MariaDB-Manager-Remote "Unable to extract compressed backup file (file corrupt?)."
+	exit 1
+fi
+cd $cur
+
 # Untarring previously retrieved fullbackup
 cur=$(pwd)
 cd "$RESTOREPATH/extr"
-tar -xivf "$backups_path/FullBackup.$BACKUPID"
+tar -xivf "${backups_path}/${filename}.bkp"
 cd $cur
 
 # Preparing the backup - applying logs
@@ -74,6 +94,11 @@ if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
 else
 	cat $TMPFILE
 fi
+
+# Cleaning /var/backups folder
+rm -f "${backups_path}/${filename}.bkp"
+rm -f "${backups_path}/${filename}.tgz"
+rm -f "${backups_path}/${filename}.log"
 
 # Stopping mysqld
 /etc/init.d/mysql stop

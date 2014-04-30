@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# This file is distributed as part of the MariaDB Enterprise.  It is free
+# This file is distributed as part of MariaDB Manager.  It is free
 # software: you can redistribute it and/or modify it under the terms of the
 # GNU General Public License as published by the Free Software Foundation,
 # version 2.
@@ -14,7 +14,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# Copyright 2012-2014 SkySQL Ab
+# Copyright 2012-2014 SkySQL Corporation Ab
 #
 # Author: Marcos Amaral
 # Date: July 2013
@@ -44,10 +44,11 @@ if ! $(echo 'exit' | /usr/bin/mysql -s $USEROPTIONS) ; then
 fi
 
 # Getting the position for the base backup
-INCRLSN=$(grep 'latest check point (for incremental):' "$backups_path/Log.$BASEBACKUPID" | awk '{ printf("%s\n", $8); }' | sed -e s/\'//g)
+INCRLSN=$(jq -r '.backup | .binlog' <<<"$backup_json")
+#INCRLSN=$(grep 'latest check point (for incremental):' "$backups_path/Log." | awk '{ printf("%s\n", $8); }' | sed -e s/\'//g)
 
 # Generating the backup file
-innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --incremental --incremental-lsn="$INCRLSN" --stream=xbstream ./ > "$backups_path/IncrBackup.$BACKUPID" 2> $TMPFILE
+innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --incremental --incremental-lsn="$INCRLSN" --stream=xbstream ./ > "$backups_path/$backup_filename" 2> $TMPFILE
 
 if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
 	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- $INNOBACKUPEX failed:"; echo

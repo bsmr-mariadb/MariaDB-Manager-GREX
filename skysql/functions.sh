@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# This file is distributed as part of the MariaDB Enterprise.  It is free
+# This file is distributed as part of MariaDB Manager.  It is free
 # software: you can redistribute it and/or modify it under the terms of the
 # GNU General Public License as published by the Free Software Foundation,
 # version 2.
@@ -14,7 +14,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# Copyright 2012-2014 SkySQL Ab
+# Copyright 2012-2014 SkySQL Corporation Ab
 #
 # Author: Marcos Amaral
 # Date: October 2013
@@ -55,7 +55,7 @@ api_call() {
 	done
 	
 	curl -s -S -X "$method" -H "Date:$api_auth_date" -H "Authorization:$api_auth_header" \
-		"$full_url" -H "Accept:application/json" "${curlargs[@]}"
+		"$full_url" -H "Accept:text/plain" "${curlargs[@]}"
 	curl_status=$?
 
         if [[ "$curl_status" != 0 ]]; then
@@ -128,15 +128,19 @@ json_error() {
 # get_online_node
 # Returns a reference (IP) to an online node on the cluster.
 get_online_node() {
-	nodes_json=$(api_call "GET" "system/$system_id/node" "state=joined" "fields=nodeid,privateip")
-	jq -r --arg cur_node_id $node_id '.nodes | map(if .nodeid != $cur_node_id then .privateip else empty end) | .[0]' <<<"$nodes_json"
+	nodes_return=$(api_call "GET" "system/$system_id/node" "fieldselect=nodes~0~privateip" "state=joined")
+ 	if [[ "$nodes_return" =~ [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3} ]]; then
+ 		echo "$nodes_return"
+ 	else
+		echo "null"
+ 	fi
 }
 
 # get_node_state
 # Returns this node's current state.
 get_node_state() {
-	node_json=$(api_call "GET" "system/$system_id/node/$node_id" "fields=state")
-	jq -r '.node | .state' <<<"$node_json"
+	node_state=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~state")
+ 	echo $node_state
 }
 
 # wait_for_state

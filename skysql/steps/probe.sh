@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# This file is distributed as part of the MariaDB Enterprise.  It is free
+# This file is distributed as part of MariaDB Manager.  It is free
 # software: you can redistribute it and/or modify it under the terms of the
 # GNU General Public License as published by the Free Software Foundation,
 # version 2.
@@ -14,7 +14,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# Copyright 2012-2014 SkySQL Ab
+# Copyright 2012-2014 SkySQL Corporation Ab
 #
 # Author: Marcos Amaral
 # Date: October 2013
@@ -44,12 +44,21 @@ if [[ $? == 0 ]]; then
 	fi	
 fi
 
-# Checking for MariaDB/Galera installation on rpm
-rpm -qa | grep MariaDB-Galera
-if [[ $? == 0 ]]; then
-	logger -p user.info -t MariaDB-Manager-Remote \
-		"Probe: The MariaDB-Galera RPM package is already installed."
-	rpm_installed=true
+# Checking for MariaDB/Galera installation on package management
+if [[ "$linux_name" == "CentOS" ]]; then
+        rpm -qa | grep MariaDB-Galera
+        if [[ $? == 0 ]]; then
+                logger -p user.info -t MariaDB-Manager-Remote \
+                        "Probe: The MariaDB-Galera RPM package is already installed."
+                package_installed=true
+        fi
+elif [[ "$linux_name" == "Debian" ]]; then
+        dpkg -s mariadb-galera-server
+        if [[ $? == 0 ]]; then
+                logger -p user.info -t MariaDB-Manager-Remote \
+                        "Probe: The MariaDB-Galera DEB package is already installed."
+                package_installed=true
+        fi
 fi
 
 # Checking if port 3306 is busy
@@ -60,8 +69,8 @@ if [[ $? == 0 ]]; then
 fi
 
 # Determining next state
-if $mysqld_found ; then
-	if $mysqld_comp ; then
+if [[ "xtrue" == "x$mysqld_found" ]] ; then
+	if [[ "xtrue" == "x$mysqld_comp" ]] ; then
 		new_state='provisioned'
 		logger -p user.info -t MariaDB-Manager-Remote \
 			"Probe: A compatible MySQL installation detected."
@@ -70,9 +79,9 @@ if $mysqld_found ; then
 		logger -p user.info -t MariaDB-Manager-Remote \
 			"Probe: An incompatible MySQL installation detected."
 	fi
-elif $rpm_installed ; then
+elif [[ "xtrue" == "x$package_installed" ]] ; then
 	new_state='provisioned'
-elif $mysql_port_busy ; then
+elif [[ "xtrue" == "x$mysql_port_busy" ]] ; then
 	new_state='incompatible'
 fi
 
@@ -83,9 +92,9 @@ if [[ $? != 0 ]] ; then
         logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to $new_state."
         exit 1
 fi
-json_error "$state_json"
-if [[ "$json_err" != "0" ]]; then
-        set_error "Failed to set the node state to $new_state."
-        logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to $new_state."
-        exit 1
-fi
+#json_error "$state_json"
+#if [[ "$json_err" != "0" ]]; then
+#        set_error "Failed to set the node state to $new_state."
+#        logger -p user.error -t MariaDB-Manager-Remote "Failed to set the node state to $new_state."
+#        exit 1
+#fi

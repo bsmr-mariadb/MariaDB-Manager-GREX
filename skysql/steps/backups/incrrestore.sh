@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# This file is distributed as part of the MariaDB Enterprise.  It is free
+# This file is distributed as part of MariaDB Manager.  It is free
 # software: you can redistribute it and/or modify it under the terms of the
 # GNU General Public License as published by the Free Software Foundation,
 # version 2.
@@ -14,7 +14,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# Copyright 2012-2014 SkySQL Ab
+# Copyright 2012-2014 SkySQL Corporation Ab
 #
 # Author: Marcos Amaral
 # Date: July 2013
@@ -68,6 +68,7 @@ prepareapply() {
 	cur=`pwd`
 	cd "$RESTOREPATH/extr"
 	tar -xivf "$backups_path/$bkpname"
+	rm -f "$backups_path/$bkpname"
 	cd "$cur"
 
 	# Preparing base backup
@@ -92,6 +93,7 @@ prepareapply() {
 		xbstream -x < $backups_path/$bkpname -C "$INCREMENTALDIR"
 		innobackupex --apply-log --defaults-file="$my_cnf_file" --use-memory=1G $USEROPTIONS --incremental-dir="$INCREMENTALDIR" "$RESTOREPATH/extr"
 		rm -fR $INCREMENTALDIR/*
+		rm -f "$backups_path/$bkpname"
 		let "index = $index - 1"
 	done
 
@@ -100,26 +102,43 @@ prepareapply() {
 }
 
 
-# getbackups(): downloads all the backups and stores them into an array, last pos == base fullbackup 
+# getbackups(): extracts all the backups and stores them into an array, last pos == base fullbackup 
 getbackups() {
 	index=0
-	BACKUPNAME=$(ls -1 "$backups_path" | grep -s Backup.$BACKUPID\$)
-
-	while [[ ! "$BACKUPNAME" == FullBackup* ]]; do
-		if [[ "$BACKUPNAME" == "" ]]; then
-			echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "Backup file not found"
-			set_error "Backup file not found."
-			exit 1
+	
+	while [[ "$BACKUPID" != "0" ]]; do
+		# Getting backup info
+		backup_json=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fields=backupurl,level,parentid")
+		filename=$(jq -r '.backup | .backupurl' <<<"$backup_json")
+		level=$(jq -r '.backup | .level' <<<"$backup_json")
+		parent_id=$(jq -r '.backup | .parentid' <<<"$backup_json")
+	
+		if [[ ! -f "${backups_path}/${filename}.tgz" ]]; then
+        		logger -p user.error -t MariaDB-Manager-Remote "Target backup file not found."
+        		exit 1
 		fi
-		arrbkp[index]="$BACKUPNAME" 
-		. ./steps/backups/getbasebackup.sh
-		export BACKUPID="$BASEBACKUPID"
-		BACKUPNAME=$(ls -1 "$backups_path" | grep -s Backup.$BACKUPID\$)
+
+		cur=$(pwd)
+		cd "$backups_path"
+		tar xzvf "${filename}.tgz"
+		tar_exit_code=$?
+		if [[ "$tar_exit_code" != "0" ]]; then
+		        logger -p user.error -t MariaDB-Manager-Remote "Unable to extract compressed backup file (file corrupt?)."
+		        exit 1
+		fi
+		rm -f "${filename}.tgz"
+		rm -f "${filename}.log"
+		cd $cur
+
+		arrbkp[index]="${filename}.bkp"
+		if [[ "$level" == "2" ]]; then
+          		BACKUPID="$parent_id"
+	        else
+        	        BACKUPID="0"
+	        fi
 		let "index = $index + 1"
 	done
 
-	arrbkp[index]="$BACKUPNAME"
-   
 	prepareapply -a arrbkp[@]
 }
 

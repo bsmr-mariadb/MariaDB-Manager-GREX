@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# This file is distributed as part of the MariaDB Enterprise.  It is free
+# This file is distributed as part of MariaDB Manager.  It is free
 # software: you can redistribute it and/or modify it under the terms of the
 # GNU General Public License as published by the Free Software Foundation,
 # version 2.
@@ -14,7 +14,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# Copyright 2012-2014 SkySQL Ab
+# Copyright 2012-2014 SkySQL Corporation Ab
 #
 # Author: Marcos Amaral
 # Date: July 2013
@@ -38,7 +38,7 @@ if [[ "$cluster_online_ip" != "null" ]]; then
         /etc/init.d/mysql start --wsrep-cluster-address=gcomm://$cluster_online_ip:4567
 	start_status=$?
 else # Starting a new cluster
-	/etc/init.d/mysql start --wsrep-cluster-address=gcomm://
+	/etc/init.d/mysql start --wsrep_new_cluster
 	start_status=$?
 fi
 

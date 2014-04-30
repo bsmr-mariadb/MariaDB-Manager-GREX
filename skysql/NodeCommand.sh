@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# This file is distributed as part of the MariaDB Enterprise.  It is free
+# This file is distributed as part of MariaDB Manager.  It is free
 # software: you can redistribute it and/or modify it under the terms of the
 # GNU General Public License as published by the Free Software Foundation,
 # version 2.
@@ -14,7 +14,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# Copyright 2012-2014 SkySQL Ab
+# Copyright 2012-2014 SkySQL Corporation Ab
 #
 # Author: Marcos Amaral
 # Date: July 2013
@@ -70,38 +70,32 @@ if [[ "$api_host" == "" ]]; then
 fi
 
 # Getting current node system information from API
-task_json=$(api_call "GET" "task/$taskid" "fields=systemid,nodeid")
-
-export system_id=$(jq -r '.task | .systemid' <<<"$task_json")
-export node_id=$(jq -r '.task | .nodeid' <<<"$task_json")
+export system_id=$(api_call "GET" "task/${taskid}" "fieldselect=task~systemid")
+export node_id=$(api_call "GET" "task/${taskid}" "fieldselect=task~nodeid")
 
 # Getting current node DB credentials from API
-node_json=$(api_call "GET" "system/$system_id/node/$node_id" \
-        "fields=name,dbusername,dbpassword,repusername,reppassword,privateip")
-
-export nodename=$(jq -r '.node | .name' <<<"$node_json")
-export db_username=$(jq -r '.node | .dbusername' <<<"$node_json")
-export db_password=$(jq -r '.node | .dbpassword' <<<"$node_json")
-export rep_username=$(jq -r '.node | .repusername' <<<"$node_json")
-export rep_password=$(jq -r '.node | .reppassword' <<<"$node_json")
-export privateip=$(jq -r '.node | .privateip' <<<"$node_json")
+export nodename=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~name" | sed -e 's/[]\/()$*.^|[]/\\&/g')
+export db_username=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~dbusername" | sed -e 's/[]\/()$*.^|[]/\\&/g')
+export db_password=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~dbpassword" | sed -e 's/[]\/()$*.^|[]/\\&/g')
+export rep_username=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~repusername" | sed -e 's/[]\/()$*.^|[]/\\&/g')
+export rep_password=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~reppassword" | sed -e 's/[]\/()$*.^|[]/\\&/g')
+export privateip=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~privateip")
 
 # Getting current system DB credentials from API (if undefined at node level)
-system_json=$(api_call "GET" "system/$system_id" \
-        "fields=dbusername,dbpassword,repusername,reppassword")
-
 if [[ "$db_username" == "" ]]; then
-        export db_username=$(jq -r '.system | .dbusername' <<<"$system_json")
+        export db_username=$(api_call "GET" "system/$system_id" "fieldselect=system~dbusername")
 fi
 if [[ "$db_password" == "" ]]; then
-        export db_password=$(jq -r '.system | .dbpassword' <<<"$system_json")
+        export db_password=$(api_call "GET" "system/$system_id" "fieldselect=system~dbpassword")
 fi
 if [[ "$rep_username" == "" ]]; then
-        export rep_username=$(jq -r '.system | .repusername' <<<"$system_json")
+        export rep_username=$(api_call "GET" "system/$system_id" "fieldselect=system~repusername")
 fi
 if [[ "$rep_password" == "" ]]; then
-        export rep_password=$(jq -r '.system | .reppassword' <<<"$system_json")
+        export rep_password=$(api_call "GET" "system/$system_id" "fieldselect=system~reppassword")
 fi
+
+export linux_name=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~linuxname")
 
 # Test command
 if [[ "$step_script" == "test" ]]; then
@@ -135,7 +129,7 @@ echo $$ > ./skysql.task.$taskid
 
 # Executing the script corresponding to the step
 fullpath="$scripts_dir/steps/$step_script.sh $params"
-sh $fullpath            > /tmp/remote.$$.log 2>&1
+bash $fullpath            > /tmp/remote.$$.log 2>&1
 return_status=$?
 if [[ $return_status == 0 ]]; then
 	pri="user.info"

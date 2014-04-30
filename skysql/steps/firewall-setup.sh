@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# This file is distributed as part of the MariaDB Enterprise.  It is free
+# This file is distributed as part of MariaDB Manager.  It is free
 # software: you can redistribute it and/or modify it under the terms of the
 # GNU General Public License as published by the Free Software Foundation,
 # version 2.
@@ -14,7 +14,7 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51
 # Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# Copyright 2012-2014 SkySQL Ab
+# Copyright 2012-2014 SkySQL Corporation Ab
 #
 # Author: Mark Riddoch
 # Date: October 2013
@@ -55,24 +55,34 @@ if [[ $? == 0 ]]; then
 		iptables -I INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 		iptables -I INPUT -p tcp --dport 3306 -j ACCEPT -m state --state NEW
 	fi
-	service iptables save
-	# Restart iptables if it is already running
-	if service iptables status > /dev/null ; then
-		service iptables restart
-	fi
+	if [[ "$linux_name" == "CentOS" ]]; then
+                service iptables save
+                # Restart iptables if it is already running
+                if service iptables status > /dev/null ; then
+                        service iptables restart
+                fi
+        elif [[ "$linux_name" == "Debian" ]]; then
+                iptables-save > /etc/iptables/rules.v4
+        fi
 
 	logger -p user.info -t MariaDB-Manager-Remote "Updated iptables rules"
-
 fi
 
 # Disable selinux
-if [[ -d /etc/selinux ]]; then
-	setenforce 0
-	sed -e 's/SELINUX=.*/SELINUX=permissive/' < /etc/selinux/config \
-		> /tmp/selinux_config \
-		&& mv /tmp/selinux_config /etc/selinux/config
+if [[ "$linux_name" == "CentOS" ]]; then
+        if [[ -d /etc/selinux ]]; then
+                setenforce 0
+                sed -e 's/SELINUX=.*/SELINUX=permissive/' < /etc/selinux/config \
+                        > /tmp/selinux_config \
+                        && mv /tmp/selinux_config /etc/selinux/config
 
-	logger -p user.info -t MariaDB-Manager-Remote "Disabled selinux"
+                logger -p user.info -t MariaDB-Manager-Remote "Disabled selinux"
+        fi
+elif [[ "$linux_name" == "Debian" ]]; then
+        if [[ -f /selinux/enforce ]]; then
+                echo 0 >/selinux/enforce
+                # permanently disabling SELinux: on GRUB configuration [/etc/grub/...]?
+        fi
 fi
 
 # Check for AppArmor and enable mysql
