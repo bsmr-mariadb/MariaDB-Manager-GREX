@@ -74,11 +74,11 @@ export system_id=$(api_call "GET" "task/${taskid}" "fieldselect=task~systemid")
 export node_id=$(api_call "GET" "task/${taskid}" "fieldselect=task~nodeid")
 
 # Getting current node DB credentials from API
-export nodename=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~name")
-export db_username=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~dbusername")
-export db_password=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~dbpassword")
-export rep_username=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~repusername")
-export rep_password=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~reppassword")
+export nodename=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~name" | sed -e 's/[]\/()$*.^|[]/\\&/g')
+export db_username=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~dbusername" | sed -e 's/[]\/()$*.^|[]/\\&/g')
+export db_password=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~dbpassword" | sed -e 's/[]\/()$*.^|[]/\\&/g')
+export rep_username=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~repusername" | sed -e 's/[]\/()$*.^|[]/\\&/g')
+export rep_password=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~reppassword" | sed -e 's/[]\/()$*.^|[]/\\&/g')
 export privateip=$(api_call "GET" "system/$system_id/node/$node_id" "fieldselect=node~privateip")
 
 # Getting current system DB credentials from API (if undefined at node level)
