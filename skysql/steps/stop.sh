@@ -1,10 +1,6 @@
 #!/bin/bash
 #
-<<<<<<< HEAD
 # This file is distributed as part of MariaDB Manager.  It is free
-=======
-# This file is distributed as part of the MariaDB Manager.  It is free
->>>>>>> debian
 # software: you can redistribute it and/or modify it under the terms of the
 # GNU General Public License as published by the Free Software Foundation,
 # version 2.
