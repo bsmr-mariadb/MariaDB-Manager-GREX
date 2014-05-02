@@ -7,7 +7,7 @@ Build-Depends: debhelper (>= 8)
 
 Package: mariadb-manager-grex
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, apt, dpkg, sudo, chkconfig, sed, coreutils, util-linux, curl (>= 7.19.7), net-tools, percona-xtrabackup, rsync, iproute, grep, findutils, gawk, netcat
+Depends: ${shlibs:Depends}, ${misc:Depends}, apt, dpkg, sudo, chkconfig, sed, coreutils, util-linux, curl (>= 7.19.7), net-tools, percona-xtrabackup, rsync, iproute, grep, findutils, gawk, netcat-openbsd | netcat
 Description: MariaDB Manager Database Node Agent
  MariaDB Manager is a tool to manage and monitor a set of MariaDB
  servers using the Galera multi-master replication form Codership.
