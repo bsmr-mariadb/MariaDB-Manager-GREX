@@ -14,7 +14,7 @@ Release: 		%{release}
 Source: 		%{name}-%{version}-%{release}.tar.gz
 Prefix: 		/
 Group: 			Development/Tools
-Requires:		yum rpm sudo chkconfig sed coreutils util-linux curl >= 7.19.7 net-tools percona-xtrabackup jq nc rsync iproute grep findutils gawk MariaDB-Galera-server galera
+Requires:		yum rpm sudo chkconfig sed coreutils util-linux curl >= 7.19.7 net-tools percona-xtrabackup jq nc rsync iproute grep findutils gawk 
 #BuildRequires:		
 
 %description
