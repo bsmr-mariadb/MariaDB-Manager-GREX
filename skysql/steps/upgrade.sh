@@ -26,15 +26,27 @@ logger -p user.info -t MariaDB-Manager-Remote "Command start: upgrade"
 #Setting the state of the command to running
 api_call "PUT" "task/$taskid" "state=running"
 
-latestVersion="MariaDB-Manager-GREX-0.4-63"
+packageName="MariaDB-Manager-GREX"
+latestVersion="0.4-63"
 latestScriptRelease="1.0.2"
-rpm -qa | grep $latestVersion
+
+if [[ "$linux_name" == "CentOS" ]] ; then
+	cmd_clean="yum clean all"
+	cmd_update="yum -y update $packageName"
+	cmd_getVersion="rpm -qa | grep $packageName | grep $latestVersion"
+elif [[ "$linux_name" == "Debian" ]] ; then
+	cmd_clean="aptitude update"
+        cmd_update="aptitude -y safe-upgrade $packageName"
+        cmd_getVersion="aptitude search $packageName | grep $latestVersion"
+fi
+
+$cmd_getVersion
 if [[ "$?" == "0" ]] ; then
 	api_call "PUT" "system/$system_id/node/$node_id" "scriptrelease=$latestScriptRelease"
 else
-	yum clean all
-	yum -y update MariaDB-Manager-GREX
-	rpm -qa | grep $latestVersion
+	$cmd_clean
+	$cmd_update
+	$cmd_getVersion
 	if [[ "$?" == "0" ]] ; then
 		logger -p user.info -t MariaDB-Manager-Remote "Remote scripts updated to version $latestVersion"
 		api_call "PUT" "system/$system_id/node/$node_id" "scriptrelease=$latestScriptRelease"
