@@ -28,7 +28,7 @@ api_call "PUT" "task/$taskid" "state=running"
 
 packageName="MariaDB-Manager-GREX"
 latestVersion="0.4-63"
-latestScriptRelease="1.0.2"
+latestScriptRelease="1.1"
 
 if [[ "$linux_name" == "CentOS" ]] ; then
 	cmd_clean="yum clean all"
