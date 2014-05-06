@@ -45,7 +45,8 @@ wsrep_cluster_name=skycluster
 # Group communication system handle: for the first node to be launched, the value should be "gcomm://", indicating creation of a new cluster;
 # for the other nodes joining the cluster, the value should be "gcomm://xxx.xxx.xxx.xxx:4567", where xxx.xxx.xxx.xxx should be the ip of a node
 # already on the cluster (usually the first one)
-wsrep_cluster_address=gcomm://
+# DEPRECATED
+# wsrep_cluster_address=gcomm://
 
 # Human-readable node name (non-unique). Hostname by default.
 wsrep_node_name=###NODE-NAME###

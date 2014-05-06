@@ -26,36 +26,30 @@ logger -p user.info -t MariaDB-Manager-Remote "Command start: upgrade"
 #Setting the state of the command to running
 api_call "PUT" "task/$taskid" "state=running"
 
+packageAPI="MariaDB-Manager-API"
+packageRepo="MariaDB-Manager-internalrepo"
 packageName="MariaDB-Manager-GREX"
-latestVersion="0.4-63"
-latestScriptRelease="1.1"
+toBeScriptRelease=$(api_call "GET" "system/0/node/0/component/api" "fieldselect=apiproperties~release")
 
 if [[ "$linux_name" == "CentOS" ]] ; then
 	cmd_clean="yum clean all"
-	cmd_update="yum -y update $packageName"
-	cmd_getVersion="rpm -qa | grep $packageName | grep $latestVersion"
+	cmd_update="yum -y update $packageName MariaDB-Galera-server galera"
 elif [[ "$linux_name" == "Debian" ]] ; then
 	cmd_clean="aptitude update"
-        cmd_update="aptitude -y safe-upgrade $packageName"
-        cmd_getVersion="aptitude search $packageName | grep $latestVersion"
+        cmd_update="aptitude -y safe-upgrade $packageName mariadb-galera-server galera"
 fi
 
-bash -c "$cmd_getVersion"
-if [[ "$?" == "0" ]] ; then
-	api_call "PUT" "system/$system_id/node/$node_id" "scriptrelease=$latestScriptRelease"
+$cmd_clean &>/dev/null
+$cmd_update &>/dev/null
+scriptRelease=$(cat GREX-release 2>/dev/null)
+if [[ "x$scriptRelease" == "x$toBeScriptRelease" ]] ; then
+	logger -p user.info -t MariaDB-Manager-Remote "Remote scripts updated to release $scriptRelease"
+	api_call "PUT" "system/$system_id/node/$node_id" "scriptrelease=$scriptRelease"
 else
-	$cmd_clean
-	$cmd_update
-	bash -c "$cmd_getVersion"
-	if [[ "$?" == "0" ]] ; then
-		logger -p user.info -t MariaDB-Manager-Remote "Remote scripts updated to version $latestVersion"
-		api_call "PUT" "system/$system_id/node/$node_id" "scriptrelease=$latestScriptRelease"
-	else
-		errorMessage="Cannot update MariaDB-Manager-GREX, check that MariaDB-Manager-API and MariaDB-Manager-internalrepo on the Manager Node are updated to the latest version"
-		logger -p user.error -t MariaDB-Manager-Remote "$errorMessage"
-		set_error "$errorMessage"
-		exit 1
-	fi
+	errorMessage="Cannot update $packageName, check that $packageAPI and $packageRepo on the Manager Node are updated to release $scriptRelease"
+	logger -p user.error -t MariaDB-Manager-Remote "$errorMessage"
+	set_error "$errorMessage"
+	exit 1
 fi
 
 exit 0

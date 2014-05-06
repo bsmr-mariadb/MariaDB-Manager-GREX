@@ -55,6 +55,12 @@ if [[ "$step_script" == "" ]]; then
 	exit 1
 fi
 
+if [[ "$step_script" =~ .*/.* ]] ; then
+	logger -p user.error -t MariaDB-Manager-Remote "Task: $taskid Character not allowed in the script name"
+	echo "1"
+	exit 1
+fi
+
 if [[ "$taskid" == "" ]]; then
 	logger -p user.error -t MariaDB-Manager-Remote \
 			"Task: $taskid Parameter value not defined: task id"
