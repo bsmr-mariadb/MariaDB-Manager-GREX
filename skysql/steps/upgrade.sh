@@ -40,13 +40,13 @@ elif [[ "$linux_name" == "Debian" ]] ; then
         cmd_getVersion="aptitude search $packageName | grep $latestVersion"
 fi
 
-$cmd_getVersion
+bash -c "$cmd_getVersion"
 if [[ "$?" == "0" ]] ; then
 	api_call "PUT" "system/$system_id/node/$node_id" "scriptrelease=$latestScriptRelease"
 else
 	$cmd_clean
 	$cmd_update
-	$cmd_getVersion
+	bash -c "$cmd_getVersion"
 	if [[ "$?" == "0" ]] ; then
 		logger -p user.info -t MariaDB-Manager-Remote "Remote scripts updated to version $latestVersion"
 		api_call "PUT" "system/$system_id/node/$node_id" "scriptrelease=$latestScriptRelease"
