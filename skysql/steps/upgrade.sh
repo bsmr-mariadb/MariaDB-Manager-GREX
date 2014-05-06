@@ -42,6 +42,9 @@ fi
 $cmd_clean &>/dev/null
 $cmd_update &>/dev/null
 scriptRelease=$(cat GREX-release 2>/dev/null)
+if [[ "x$scriptRelease" == "x" ]] ; then
+	logger -p user.warn -t MariaDB-Manager-Remote "Cannot determine the GREX release: further errors may be logged"
+fi
 if [[ "x$scriptRelease" == "x$toBeScriptRelease" ]] ; then
 	logger -p user.info -t MariaDB-Manager-Remote "Remote scripts updated to release $scriptRelease"
 	api_call "PUT" "system/$system_id/node/$node_id" "scriptrelease=$scriptRelease"
