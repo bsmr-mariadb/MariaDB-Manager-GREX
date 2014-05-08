@@ -82,7 +82,7 @@ fi
 sleep 5
 
 # Debian only: copy the debian.cnf into /etc/mysql if available in the API
-if [[ "x$linux_name" == "Debian" || "x$linux_name" == "Ubuntu" ]] ; then
+if [[ "$linux_name" == "Debian" || "$linux_name" == "Ubuntu" ]] ; then
 	debianConf=$(api_call "GET" "system/${system_id}/node/0/component/grex/property/debian.cnf" "fieldselect=componentproperty~debian.cnf")
 	if [[ "x$debianConf" =~ ^xUnable[[:space:]]to[[:space:]]find ]] ; then
 		debianConf=$(cat /etc/mysql/debian.cnf)
