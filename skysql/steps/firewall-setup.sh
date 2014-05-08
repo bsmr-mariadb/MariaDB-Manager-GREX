@@ -61,7 +61,7 @@ if [[ $? == 0 ]]; then
                 if service iptables status > /dev/null ; then
                         service iptables restart
                 fi
-        elif [[ "$linux_name" == "Debian" ]]; then
+        elif [[ "$linux_name" == "Debian" || "$linux_name" == "Ubuntu" ]]; then
                 iptables-save > /etc/iptables/rules.v4
         fi
 
@@ -78,7 +78,7 @@ if [[ "$linux_name" == "CentOS" ]]; then
 
                 logger -p user.info -t MariaDB-Manager-Remote "Disabled selinux"
         fi
-elif [[ "$linux_name" == "Debian" ]]; then
+elif [[ "$linux_name" == "Debian" || "$linux_name" == "Ubuntu" ]]; then
         if [[ -f /selinux/enforce ]]; then
                 echo 0 >/selinux/enforce
                 # permanently disabling SELinux: on GRUB configuration [/etc/grub/...]?

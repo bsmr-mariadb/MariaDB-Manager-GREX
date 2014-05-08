@@ -39,7 +39,7 @@ if [[ "$linux_name" == "CentOS" ]]; then
                 logger -p user.error -t MariaDB-Manager-Remote "Error installing MariaDB packages."
                 exit $rpm_q_status
         fi
-elif [[ "$linux_name" == "Debian" ]]; then
+elif [[ "$linux_name" == "Debian" || "$linux_name" == "Ubuntu" ]]; then
         # Installing MariaDB packages
         apt-get update
         apt-get install -y --force-yes mariadb-galera-server mariadb-client

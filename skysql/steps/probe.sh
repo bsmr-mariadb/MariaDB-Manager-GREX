@@ -52,7 +52,7 @@ if [[ "$linux_name" == "CentOS" ]]; then
                         "Probe: The MariaDB-Galera RPM package is already installed."
                 package_installed=true
         fi
-elif [[ "$linux_name" == "Debian" ]]; then
+elif [[ "$linux_name" == "Debian" || "$linux_name" == "Ubuntu" ]]; then
         dpkg -s mariadb-galera-server
         if [[ $? == 0 ]]; then
                 logger -p user.info -t MariaDB-Manager-Remote \

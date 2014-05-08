@@ -34,7 +34,7 @@ toBeScriptRelease=$(api_call "GET" "system/0/node/0/component/api" "fieldselect=
 if [[ "$linux_name" == "CentOS" ]] ; then
 	cmd_clean="yum clean all"
 	cmd_update="yum -y update $packageName MariaDB-Galera-server galera"
-elif [[ "$linux_name" == "Debian" ]] ; then
+elif [[ "$linux_name" == "Debian" || "$linux_name" == "Ubuntu" ]] ; then
 	cmd_clean="aptitude update"
         cmd_update="aptitude -y safe-upgrade $packageName mariadb-galera-server galera"
 fi

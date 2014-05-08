@@ -60,7 +60,7 @@ if [[ "$linux_name" == "CentOS" ]]; then
 	        set_error "Error generating galera configuration file"
         	exit 1
 	fi
-elif [[ "$linux_name" == "Debian" ]]; then
+elif [[ "$linux_name" == "Debian" || "$linux_name" == "Ubuntu" ]]; then
         echo "!includedir /etc/mysql/conf.d/" > /etc/mysql/my.cnf
         sed -e "s/###NODE-ADDRESS###/$privateip/g" \
                 -e "s/###NODE-NAME###/$nodename/g" \
@@ -103,7 +103,7 @@ FLUSH PRIVILEGES;"
 
 if [[ "$linux_name" == "CentOS" ]]; then
         my_cnf_path="/etc/my.cnf"
-elif [[ "$linux_name" == "Debian" ]]; then
+elif [[ "$linux_name" == "Debian" || "$linux_name" == "Ubuntu" ]]; then
         my_cnf_path="/etc/mysql/my.cnf"
 fi
 
@@ -135,7 +135,7 @@ fi
 # Disabling mysqld auto startup on boot
 if [[ "$linux_name" == "CentOS" ]]; then
 	chkconfig --del mysql
-elif [[ "$linux_name" == "Debian" ]]; then
+elif [[ "$linux_name" == "Debian" || "$linux_name" == "Ubuntu" ]]; then
 	update-rc.d -f mysql remove
 fi
 
