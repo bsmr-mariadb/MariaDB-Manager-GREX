@@ -35,10 +35,10 @@ api_call "PUT" "task/$taskid" "state=running"
 cluster_online_ip=$(get_online_node)
 
 if [[ "$cluster_online_ip" != "null" ]]; then
-        /etc/init.d/mysql start --wsrep-cluster-address=gcomm://$cluster_online_ip:4567
+	/etc/init.d/mysql start --wsrep-cluster-address=gcomm://$cluster_online_ip:4567
 	start_status=$?
 else # Starting a new cluster
-	/etc/init.d/mysql start --wsrep_new_cluster
+	/etc/init.d/mysql start --wsrep-cluster-address=gcomm://
 	start_status=$?
 fi
 
