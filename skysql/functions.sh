@@ -160,9 +160,23 @@ wait_for_state() {
 	exit 1
 }
 
+# cmd_logger_info
+# Logs with info level. Accepts the string to log.
+cmd_logger_info () {
+	logger -p user.info -t MariaDB-Manager-Remote "$1"
+}
+
+# cmd_logger_error
+# Logs with error level. Accepts the string to log.
+cmd_logger_error () {
+	logger -p user.error -t MariaDB-Manager-Remote "$1"
+}
+
 export -f api_call
 export -f set_error
 export -f json_error
 export -f get_online_node
 export -f get_node_state
 export -f wait_for_state
+export -f cmd_logger_info
+export -f cmd_logger_error

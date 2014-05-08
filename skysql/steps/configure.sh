@@ -99,6 +99,22 @@ GRANT ALL PRIVILEGES ON *.* TO $rep_username@'%' IDENTIFIED BY '$rep_password'; 
 GRANT ALL PRIVILEGES ON *.* TO $db_username@'%' IDENTIFIED BY '$db_password'; \
 FLUSH PRIVILEGES;"
 
+# Check users before stopping the server
+mysql -u root -e "SELECT user FROM mysql.user WHERE user = '$rep_username'" | grep -q "$rep_username"
+if [[ "$?" != 0 ]] ; then
+	errorMessage="Replication user not created"
+	cmd_logger_error "$errorMessage"
+	set_error "$errorMessage"
+	exit 1
+fi
+mysql -u root -e "SELECT user FROM mysql.user WHERE user = '$rep_username'" | grep -q "$rep_username"
+if [[ "$?" != 0 ]] ; then
+	errorMessage="Database user not created"
+	cmd_logger_error "$errorMessage"
+	set_error "$errorMessage"
+	exit 1
+fi
+
 /etc/init.d/mysql stop
 
 if [[ "$linux_name" == "CentOS" ]]; then
