@@ -81,6 +81,19 @@ fi
 
 sleep 5
 
+# Debian only: copy the debian.cnf into /etc/mysql if available in the API
+if [[ "x$linux_name" == "Debian" || "x$linux_name" == "Ubuntu" ]] ; then
+	debianConf=$(api_call "GET" "system/${system_id}/node/0/component/grex/property/debian.cnf" "fieldselect=componentproperty~debian.cnf")
+	if [[ "x$debianConf" =~ ^xUnable[[:space:]]to[[:space:]]find ]] ; then
+		debianConf=$(cat /etc/mysql/debian.cnf)
+		api_call "PUT" "system/${system_id}/node/0/component/grex/property/debian.cnf" "value=$debianConf"
+	else
+		echo "$debianConf" > /etc/mysql/debian.cnf
+		debianPassword=$(grep "^password" /etc/mysql/debian.cnf | head -n 1 | cut -f2 -d"=" | tr -d ' \t\n\r\f')
+		mysql -u root -e "UPDATE mysql.user SET Password=PASSWORD('$debianPassword') WHERE User='debian-sys-maint'"			
+	fi
+fi
+
 mysql -u root -e "DELETE FROM mysql.user WHERE user = ''; \
 GRANT ALL PRIVILEGES ON *.* TO $rep_username@'%' IDENTIFIED BY '$rep_password'; \
 GRANT ALL PRIVILEGES ON *.* TO $db_username@'%' IDENTIFIED BY '$db_password'; \
