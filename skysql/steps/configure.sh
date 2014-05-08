@@ -77,7 +77,7 @@ elif [[ "$linux_name" == "Debian" ]]; then
 fi
 
 # Setting up MariaDB users
-/etc/init.d/mysql start --wsrep_new_cluster
+/etc/init.d/mysql start --wsrep-cluster-address=gcomm://
 
 sleep 5
 
