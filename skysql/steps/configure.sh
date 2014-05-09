@@ -18,7 +18,8 @@
 #
 # Author: Marcos Amaral
 # Date: July 2013
-#
+# Author: Massimo Siani
+# Date: May 2014: fixes for Debian/Ubuntu, user creation checks.
 #
 # This script does the necessary configuration steps to have the node ready for
 # command execution.
@@ -90,7 +91,13 @@ if [[ "$linux_name" == "Debian" || "$linux_name" == "Ubuntu" ]] ; then
 	else
 		echo "$debianConf" > /etc/mysql/debian.cnf
 		debianPassword=$(grep "^password" /etc/mysql/debian.cnf | head -n 1 | cut -f2 -d"=" | tr -d ' \t\n\r\f')
-		mysql -u root -e "UPDATE mysql.user SET Password=PASSWORD('$debianPassword') WHERE User='debian-sys-maint'"			
+		mysql -u root -e "UPDATE mysql.user SET Password=PASSWORD('$debianPassword') WHERE User='debian-sys-maint'"
+		if [[ "$?" != 0 ]] ; then
+			errorMessage="The password for the debian-sys-maint user cannot be set: the node will not join the cluster"
+			cmd_logger_error "$errorMessage"
+			set_error "$errorMessage"
+			exit 1
+		fi
 	fi
 fi
 
