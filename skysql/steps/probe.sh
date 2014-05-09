@@ -18,11 +18,13 @@
 #
 # Author: Marcos Amaral
 # Date: October 2013
-#
+# Massimo Siani, May 2014: merge with upgrade
 #
 # This script looks for current MySQL/MariaDB installations and updates node state
 # accordingly.
 #
+
+$(dirname $0)/upgrade.sh
 
 logger -p user.info -t MariaDB-Manager-Remote "Command start: probe"
 

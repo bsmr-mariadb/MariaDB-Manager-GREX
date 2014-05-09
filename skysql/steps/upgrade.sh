@@ -21,22 +21,25 @@
 
 . ./remote-scripts-config.sh
 
+packageAPI="MariaDB-Manager-API"
+packageRepo="MariaDB-Manager-internalrepo"
+packageName="MariaDB-Manager-GREX"
+toBeScriptRelease=$(api_call "GET" "system/0/node/0/component/api" "fieldselect=apiproperties~release")
+scriptRelease=$(cat GREX-release 2>/dev/null)
+
+[[ "x$scriptRelease" == "x$toBeScriptRelease" ]] && exit 0
+
 logger -p user.info -t MariaDB-Manager-Remote "Command start: upgrade"
 
 #Setting the state of the command to running
 api_call "PUT" "task/$taskid" "state=running"
 
-packageAPI="MariaDB-Manager-API"
-packageRepo="MariaDB-Manager-internalrepo"
-packageName="MariaDB-Manager-GREX"
-toBeScriptRelease=$(api_call "GET" "system/0/node/0/component/api" "fieldselect=apiproperties~release")
-
 if [[ "$linux_name" == "CentOS" ]] ; then
 	cmd_clean="yum clean all"
-	cmd_update="yum -y update $packageName MariaDB-Galera-server galera"
+	cmd_update="yum -y update $packageName MariaDB-Galera-server galera --disablerepo=* --enablerepo=MariaDB-Manager"
 elif [[ "$linux_name" == "Debian" || "$linux_name" == "Ubuntu" ]] ; then
 	cmd_clean="aptitude update"
-        cmd_update="aptitude -y safe-upgrade $packageName mariadb-galera-server galera"
+	cmd_update="aptitude -y safe-upgrade $packageName mariadb-galera-server galera"
 fi
 
 $cmd_clean &>/dev/null
@@ -54,5 +57,7 @@ else
 	set_error "$errorMessage"
 	exit 1
 fi
+
+cmd_logger_info "Command end: upgrade"
 
 exit 0
