@@ -27,7 +27,10 @@ packageName="MariaDB-Manager-GREX"
 toBeScriptRelease=$(api_call "GET" "system/0/node/0/component/api" "fieldselect=apiproperties~release")
 scriptRelease=$(cat GREX-release 2>/dev/null)
 
-[[ "x$scriptRelease" == "x$toBeScriptRelease" ]] && exit 0
+if [[ "x$scriptRelease" == "x$toBeScriptRelease" ]] ; then
+	api_call "PUT" "system/$system_id/node/$node_id" "scriptrelease=$scriptRelease"
+	exit 0
+fi
 
 logger -p user.info -t MariaDB-Manager-Remote "Command start: upgrade"
 
