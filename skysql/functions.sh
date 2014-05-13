@@ -40,12 +40,12 @@ api_call() {
 	# URL for the request
 	full_url="http://$api_host/restfulapi/$request_uri"
 
-        # Getting system date in the required format for authentication
-        api_auth_date=`date --rfc-2822`
+	# Getting system date in the required format for authentication
+	api_auth_date=`date --rfc-2822`
 
-        # Getting checksum and creating authentication header
-        md5_chksum=$(echo -n $request_uri$auth_key$api_auth_date | md5sum | awk '{print $1}')
-        api_auth_header="api-auth-$auth_key_number-$md5_chksum"
+	# Getting checksum and creating authentication header
+	md5_chksum=$(echo -n $request_uri$auth_key$api_auth_date | md5sum | awk '{print $1}')
+	api_auth_header="api-auth-$auth_key_number-$md5_chksum"
 
 	curlargs=( --data-urlencode suppress_response_codes=true )
 	[[ $method == "GET" ]] && curlargs+=('-G')
@@ -58,8 +58,8 @@ api_call() {
 		"$full_url" -H "Accept:text/plain" "${curlargs[@]}"
 	curl_status=$?
 
-        if [[ "$curl_status" != 0 ]]; then
-                case "$curl_status" in
+	if [[ "$curl_status" != 0 ]]; then
+		case "$curl_status" in
 
                 1)
                         msg="Unsupported protocol"
@@ -87,11 +87,10 @@ api_call() {
                         ;;
                 *)
                         msg="curl failed with exit code $curl_status"
-                esac
-
-                logger -p user.error -t MariaDB-Manager-Remote "restfulapi-call: $full_url failed, $msg"
-                exit $curl_status
-        fi
+        esac
+        logger -p user.error -t MariaDB-Manager-Remote "restfulapi-call: $full_url failed, $msg"
+        exit $curl_status
+    fi
 }
 
 # set_error()
@@ -100,7 +99,7 @@ api_call() {
 # Parameters:
 # $1: HTTP request type
 set_error() {
-        api_call "PUT" "task/$taskid" "errormessage=$1"
+	api_call "PUT" "task/$taskid" "errormessage=$1"
 }
 
 # json_error
@@ -114,15 +113,15 @@ set_error() {
 # $json_err:    0 if no error was detected
 json_error() {
 	error_text=$(jq -r '.errors' <<<"$1")
-        if [[ "$error_text" != "null" ]] ; then
-                logger -p user.error -t MariaDB-Manager-Remote "API call failed: $error_text"
-                if [[ "$error_text" =~ "Date header out of range" ]]; then
-                        logger -p user.error -t MariaDB-Manager-Remote "Date and time on the local host must be synchronised with the API host"
-                fi
-                json_err=1
-        else
-                json_err=0
-        fi
+	if [[ "$error_text" != "null" ]] ; then
+		logger -p user.error -t MariaDB-Manager-Remote "API call failed: $error_text"
+		if [[ "$error_text" =~ "Date header out of range" ]]; then
+			logger -p user.error -t MariaDB-Manager-Remote "Date and time on the local host must be synchronised with the API host"
+		fi
+		json_err=1
+	else
+		json_err=0
+    fi
 }
 
 # get_online_node
@@ -154,7 +153,7 @@ wait_for_state() {
 	        if [[ "$node_state" == "$1" ]]; then
                 	exit 0
 	        fi
-        	no_retries=$((no_retries - 1))
+	        (( no_retries-- ))
 	done
 
 	exit 1
