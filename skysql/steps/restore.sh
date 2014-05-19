@@ -28,7 +28,7 @@
 logger -p user.info -t MariaDB-Manager-Remote "Command start: restore"
 
 # Parameter parsing and validation
-set $params
+[[ "x$params" != "x" ]] && set $params
 while [[ $# > 0 ]]; do
         param_name="${1%%=*}"
         param_value="${1#*=}"
