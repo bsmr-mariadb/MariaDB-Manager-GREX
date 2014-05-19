@@ -45,10 +45,10 @@ fi
 
 # Getting the position for the base backup
 INCRLSN=$BASEBACKUPID
-#INCRLSN=$(grep 'latest check point (for incremental):' "$backups_path/Log." | awk '{ printf("%s\n", $8); }' | sed -e s/\'//g)
+#INCRLSN=$(grep 'latest check point (for incremental):' "$backups_remotepath/Log." | awk '{ printf("%s\n", $8); }' | sed -e s/\'//g)
 
 # Generating the backup file
-innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --incremental --incremental-lsn="$INCRLSN" --stream=xbstream ./ > "$backups_path/$backup_filename" 2> $TMPFILE
+innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --incremental --incremental-lsn="$INCRLSN" --stream=xbstream ./ > "$backups_remotepath/$backup_filename" 2> $TMPFILE
 
 if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
 	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- innobackupex failed:"; echo

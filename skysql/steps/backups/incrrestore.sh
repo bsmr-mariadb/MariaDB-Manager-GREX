@@ -67,8 +67,8 @@ prepareapply() {
 	# Extracting previouly retrieved base fullbackup
 	cur=`pwd`
 	cd "$RESTOREPATH/extr"
-	tar -xivf "$backups_path/$bkpname"
-	rm -f "$backups_path/$bkpname"
+	tar -xivf "$backups_remotepath/$bkpname"
+	rm -f "$backups_remotepath/$bkpname"
 	cd "$cur"
 
 	# Preparing base backup
@@ -90,10 +90,10 @@ prepareapply() {
 	while [[ "$index" -ge 0 ]]
 	do
 		bkpname=${arrbkp[index]}
-		xbstream -x < $backups_path/$bkpname -C "$INCREMENTALDIR"
+		xbstream -x < $backups_remotepath/$bkpname -C "$INCREMENTALDIR"
 		innobackupex --apply-log --defaults-file="$my_cnf_file" --use-memory=1G $USEROPTIONS --incremental-dir="$INCREMENTALDIR" "$RESTOREPATH/extr"
 		rm -fR $INCREMENTALDIR/*
-		rm -f "$backups_path/$bkpname"
+		rm -f "$backups_remotepath/$bkpname"
 		let "index = $index - 1"
 	done
 
@@ -112,13 +112,13 @@ getbackups() {
 		level=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fieldselect=backup~level")
 		parent_id=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fieldselect=backup~parentid")
 	
-		if [[ ! -f "${backups_path}/${filename}.tgz" ]]; then
+		if [[ ! -f "${backups_remotepath}/${filename}.tgz" ]]; then
         		logger -p user.error -t MariaDB-Manager-Remote "Target backup file not found."
         		exit 1
 		fi
 
 		cur=$(pwd)
-		cd "$backups_path"
+		cd "$backups_remotepath"
 		tar xzvf "${filename}.tgz"
 		tar_exit_code=$?
 		if [[ "$tar_exit_code" != "0" ]]; then

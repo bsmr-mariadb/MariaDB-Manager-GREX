@@ -25,8 +25,8 @@
 #
 
 # Creating the backup directory if it does not exist
-mkdir -p "$backups_path"
-chown skysqlagent:skysqlagent "$backups_path"
+mkdir -p "$backups_remotepath"
+chown skysqlagent:skysqlagent "$backups_remotepath"
 
 TMPFILE="/tmp/innobackupex-runner.$$.tmp"
 if [[ -z "$db_password" ]]; then
@@ -49,7 +49,7 @@ if ! $(echo 'exit' | /usr/bin/mysql -s $USEROPTIONS) ; then
 fi
 
 # Generating the backup file
-innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --stream=tar ./ > "$backups_path/$backup_filename" 2> $TMPFILE
+innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --stream=tar ./ > "$backups_remotepath/$backup_filename" 2> $TMPFILE
 
 if [[ -z "$(tail -1 $TMPFILE | grep 'completed OK!')" ]] ; then
 	echo "ERROR :" $(date "+%Y%m%d_%H%M%S") "-- innobackupex failed:"; echo

@@ -59,14 +59,14 @@ mkdir -p "$RESTOREPATH/extr"
 # Getting backup filename
 filename=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fieldselect=backup~backupurl")
 
-if [[ ! -f "${backups_path}/${filename}.tgz" ]]; then
+if [[ ! -f "${backups_remotepath}/${filename}.tgz" ]]; then
 	logger -p user.error -t MariaDB-Manager-Remote "Target backup file not found."
 	exit 1
 fi
 
 # Extracting compressed backup file
 cur=$(pwd)
-cd "$backups_path"
+cd "$backups_remotepath"
 tar_output=$(tar xzvf "${filename}.tgz")
 tar_exit_code=$?
 if [[ "$tar_exit_code" != "0" ]]; then
@@ -78,7 +78,7 @@ cd $cur
 # Untarring previously retrieved fullbackup
 cur=$(pwd)
 cd "$RESTOREPATH/extr"
-tar -xivf "${backups_path}/${filename}.bkp"
+tar -xivf "${backups_remotepath}/${filename}.bkp"
 cd $cur
 
 # Preparing the backup - applying logs
@@ -95,9 +95,9 @@ else
 fi
 
 # Cleaning /var/backups folder
-rm -f "${backups_path}/${filename}.bkp"
-rm -f "${backups_path}/${filename}.tgz"
-rm -f "${backups_path}/${filename}.log"
+rm -f "${backups_remotepath}/${filename}.bkp"
+rm -f "${backups_remotepath}/${filename}.tgz"
+rm -f "${backups_remotepath}/${filename}.log"
 
 # Stopping mysqld
 /etc/init.d/mysql stop

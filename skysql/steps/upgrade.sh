@@ -20,6 +20,8 @@
 # Date: May 2014
 
 . ./remote-scripts-config.sh
+. ./mysql-config.sh
+mkdir -p $backups_remotepath
 
 packageAPI="MariaDB-Manager-API"
 packageRepo="MariaDB-Manager-internalrepo"

@@ -97,7 +97,7 @@ fi
 
 #binlogpos=$(grep binlog /tmp/backup.log.$$ | awk '{ printf("%s%s\n", $6, $8); }' | sed -e s/\'//g)
 incr_lsn=$(grep 'latest check point (for incremental):' /tmp/backup.log.$$ | awk '{ printf("%s\n", $8); }' | sed -e s/\'//g)
-size=$(du -k "$backups_path/$backup_filename" | awk '{ print $1 }')
+size=$(du -k "$backups_remotepath/$backup_filename" | awk '{ print $1 }')
 
 if [[ "$bkstatus" -eq 0 ]] ; then # Backup successful
 	# Updating backup state (completed) and other data on the DB
@@ -117,7 +117,7 @@ if [[ "$bkstatus" -eq 0 ]] ; then # Backup successful
 	fi
 
 	# Putting the log in place
-	mv /tmp/backup.log.$$ "$backups_path/$log_filename"
+	mv /tmp/backup.log.$$ "$backups_remotepath/$log_filename"
 else # Backup unsuccessful
 	# Updating backup state (error)
 	./steps/backups/updatestatus.sh $BACKUPID "error"
@@ -129,7 +129,7 @@ else # Backup unsuccessful
 fi
 
 cur=$(pwd)
-cd "$backups_path"
+cd "$backups_remotepath"
 tar czvf "${filename}.tgz" "${backup_filename}" "${log_filename}"
 rm -f "${backup_filename}" "${log_filename}"
 chown skysqlagent:skysqlagent "${filename}.tgz"
