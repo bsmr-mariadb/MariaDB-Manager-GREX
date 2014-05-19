@@ -109,7 +109,7 @@ if [[ "$step_script" == "test" ]]; then
 elif [[ "$step_script" == "cancel" ]]; then
         if [[ -f skysql.task.$taskid ]]; then
                 p_PID=$(cat skysql.task.$taskid)
-                rm -f skysql.tasl.$taskid
+                rm -f skysql.task.$taskid
 
                 # Getting command process list
                 list_PID=$p_PID
@@ -146,7 +146,7 @@ logger -p $pri -t MariaDB-Manager-Task -f /tmp/remote.$$.log
 rm -f /tmp/remote.$$.log
 
 if [[ -f skysql.task.$taskid ]]; then
-        rm -f skysql.tasl.$taskid
+        rm -f skysql.task.$taskid
 fi
 
 # Putting script exit code on output for the API-side to be able to read it via ssh
