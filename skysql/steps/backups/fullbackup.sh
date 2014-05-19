@@ -17,6 +17,7 @@
 # Copyright 2012-2014 SkySQL Corporation Ab
 #
 # Author: Marcos Amaral
+# Author: Massimo Siani
 # Date: July 2013
 #
 #
@@ -25,7 +26,7 @@
 
 # Creating the backup directory if it does not exist
 mkdir -p "$backups_path"
-chown skysqlagent.skysqlagent "$backups_path"
+chown skysqlagent:skysqlagent "$backups_path"
 
 TMPFILE="/tmp/innobackupex-runner.$$.tmp"
 if [[ -z "$db_password" ]]; then

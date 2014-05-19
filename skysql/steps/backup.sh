@@ -17,6 +17,7 @@
 # Copyright 2012-2014 SkySQL Corporation Ab
 #
 # Author: Marcos Amaral
+# Author: Massimo Siani
 # Date: July 2013
 #
 #
@@ -131,7 +132,7 @@ cur=$(pwd)
 cd "$backups_path"
 tar czvf "${filename}.tgz" "${backup_filename}" "${log_filename}"
 rm -f "${backup_filename}" "${log_filename}"
-chown skysqlagent.skysqlagent "${filename}.tgz"
+chown skysqlagent:skysqlagent "${filename}.tgz"
 cd $cur
 
 # Returning unix return code

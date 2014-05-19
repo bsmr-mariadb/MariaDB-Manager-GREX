@@ -7,4 +7,4 @@ elif [[ "$linux_name" == "Debian" || "$linux_name" == "Ubuntu" ]] ; then
 fi
 export my_cnf_file
 
-export backups_path="/var/backups"
+export backups_remotepath=$(api_call "GET" "config/backups/remotepath" "fieldselect=remotepath")

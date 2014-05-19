@@ -136,8 +136,7 @@ if [[ my_cnf_path != "" ]]; then
 
         mv /tmp/mysql-config.sh.tmp mysql-config.sh
 else
-        my_cnf_path=$(cat mysql-config.sh | \
-                awk 'BEGIN { FS="=" } { gsub("\"", "", $2); if ($1 == "export my_cnf_file") print $2 }')
+        my_cnf_path=$(. ./mysql-config.sh 2>/dev/null ; echo "$my_cnf_file")
 fi
 
 if [[ ! -s mysql-config.sh ]]; then
