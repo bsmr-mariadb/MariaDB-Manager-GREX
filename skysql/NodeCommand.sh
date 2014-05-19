@@ -45,7 +45,7 @@ export auth_key=$(awk -F ":" '{ print $2 }' credentials.ini)
 
 . ./functions.sh
 
-logger -p user.info -t MariaDB-Manager-Remote "Task: $taskid Command: $step_script $params" 
+logger -p user.info -t MariaDB-Manager-Remote "Task: $taskid Command: $step_script $params"
 
 # Validations
 if [[ "$step_script" == "" ]]; then
@@ -142,7 +142,7 @@ if [[ $return_status == 0 ]]; then
 else
 	pri="user.error"
 fi
-logger -p $pri -t MariaDB-Manager-Task -f /tmp/remote.$$.log
+logger -p $pri -t MariaDB-Manager-Remote -f /tmp/remote.$$.log
 rm -f /tmp/remote.$$.log
 
 if [[ -f skysql.task.$taskid ]]; then
