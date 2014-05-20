@@ -112,7 +112,11 @@ set_error() {
 # Returns
 # $json_err:    0 if no error was detected
 json_error() {
-	error_text=$(jq -r '.errors' <<<"$1")
+	if grep -q '"errors":' <<<"$1" ; then
+		error_text=$(sed 's/.*"errors":\["//' <<<"$1" | sed 's/"\].*//')
+	else
+		error_text="null"
+	fi
 	if [[ "$error_text" != "null" ]] ; then
 		logger -p user.error -t MariaDB-Manager-Remote "API call failed: $error_text"
 		if [[ "$error_text" =~ "Date header out of range" ]]; then
