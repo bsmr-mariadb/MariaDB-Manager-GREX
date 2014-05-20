@@ -94,7 +94,7 @@ else
 	cat $TMPFILE
 fi
 
-# Cleaning /var/backups folder
+# Cleaning remote backups folder
 rm -f "${backups_remotepath}/${filename}.bkp"
 rm -f "${backups_remotepath}/${filename}.tgz"
 rm -f "${backups_remotepath}/${filename}.log"
