@@ -110,8 +110,8 @@ if [[ "$bkstatus" -eq 0 ]] ; then # Backup successful
 	elif [[ "$level" -eq 2 ]] ; then
 		./steps/backups/updatestatus.sh "$BACKUPID" "done" \
 			size="$size" \
-                        backupurl="$filename" \
-                        binlog="$incr_lsn" \
+			backupurl="$filename" \
+			binlog="$incr_lsn" \
 			log="$log_filename" \
 			parent="$BASEBACKUPID"
 	fi

@@ -26,7 +26,6 @@
 TMPFILE="/tmp/innobackupex-runner.$$.tmp"
 if [[ -z "$db_password" ]]; then
         USEROPTIONS="--user=$db_username"
-
 else
         USEROPTIONS="--user=$db_username --password=$db_password"
 fi
@@ -44,8 +43,7 @@ if ! $(echo 'exit' | /usr/bin/mysql -s $USEROPTIONS) ; then
 fi
 
 # Getting the position for the base backup
-INCRLSN=$BASEBACKUPID
-#INCRLSN=$(grep 'latest check point (for incremental):' "$backups_remotepath/Log." | awk '{ printf("%s\n", $8); }' | sed -e s/\'//g)
+INCRLSN=$(api_call "GET" "system/$system_id/backup/$BASEBACKUPID" "fieldselect=backup~binlog")
 
 # Generating the backup file
 innobackupex $USEROPTIONS --defaults-file="$my_cnf_file" --incremental --incremental-lsn="$INCRLSN" --stream=xbstream ./ > "$backups_remotepath/$backup_filename" 2> $TMPFILE

@@ -35,7 +35,6 @@ mkdir -p "$RESTOREPATH/mysql_tmp_cp"
 
 if [[ -z "$db_password" ]]; then
         USEROPTIONS="--user=$db_username"
-
 else
         USEROPTIONS="--user=$db_username --password=$db_password"
 fi
@@ -49,15 +48,12 @@ fi
 # prepareapply(): Prepares the full backup and applies on it all the incrementals from the oldest to the youngest
 # Arguments:
 #      -a arg: the array which stores the Backup names (assumes the base fullbackup is stored on its last position)
-
 prepareapply() {
-	while getopts  "a:" Option
-	do
-	case $Option in
-	a)   declare -a arrbkp=("${!OPTARG}") ;;
-
-	* ) echo "Not recognized argument"; exit -1 ;;
-	esac
+	while getopts  "a:" Option ; do
+		case $Option in
+			a)   declare -a arrbkp=("${!OPTARG}") ;;
+			* ) echo "Not recognized argument"; exit -1 ;;
+		esac
 	done
 
 	index=$((${#arrbkp[@]} - 1))
@@ -113,8 +109,10 @@ getbackups() {
 		parent_id=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fieldselect=backup~parentid")
 	
 		if [[ ! -f "${backups_remotepath}/${filename}.tgz" ]]; then
-        		logger -p user.error -t MariaDB-Manager-Remote "Target backup file not found."
-        		exit 1
+			errorMessage="Target backup file ${filename}.tgz not found."
+			logger -p user.error -t MariaDB-Manager-Remote "$errorMessage"
+			set_error "$errorMessage"
+			exit 1
 		fi
 
 		cur=$(pwd)
@@ -122,8 +120,10 @@ getbackups() {
 		tar xzvf "${filename}.tgz"
 		tar_exit_code=$?
 		if [[ "$tar_exit_code" != "0" ]]; then
-		        logger -p user.error -t MariaDB-Manager-Remote "Unable to extract compressed backup file (file corrupt?)."
-		        exit 1
+			errorMessage="Unable to extract compressed backup file (file corrupt?)."
+			logger -p user.error -t MariaDB-Manager-Remote "$errorMessage"
+			set_error "$errorMessage"
+			exit 1
 		fi
 		rm -f "${filename}.tgz"
 		rm -f "${filename}.log"
@@ -134,7 +134,7 @@ getbackups() {
           		BACKUPID="$parent_id"
 	        else
         	        BACKUPID="0"
-	        fi
+	    fi
 		let "index = $index + 1"
 	done
 

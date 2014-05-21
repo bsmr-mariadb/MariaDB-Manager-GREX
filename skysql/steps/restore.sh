@@ -68,4 +68,6 @@ if [[ "$restorestatus" -eq 0 ]]; then
     ./steps/backups/updatestatus.sh "$BACKUPID" "done" restored="@$time"
 fi
 
+logger -p user.info -t MariaDB-Manager-Remote "Command finished: restore"
+
 exit $restorestatus

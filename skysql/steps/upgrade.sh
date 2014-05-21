@@ -27,7 +27,7 @@ chown skysqlagent:skysqlagent $backups_remotepath
 packageAPI="MariaDB-Manager-API"
 packageRepo="MariaDB-Manager-internalrepo"
 packageName="MariaDB-Manager-GREX"
-toBeScriptRelease=$(api_call "GET" "system/0/node/0/component/api" "fieldselect=apiproperties~release")
+toBeScriptRelease=$(api_call "GET" "system/0/node/0/component/api" "fieldselect=apiproperties~release" 2>/dev/null)
 scriptRelease=$(cat GREX-release 2>/dev/null)
 
 if [[ "x$scriptRelease" == "x$toBeScriptRelease" ]] ; then
