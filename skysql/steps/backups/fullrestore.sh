@@ -60,7 +60,9 @@ mkdir -p "$RESTOREPATH/extr"
 filename=$(api_call "GET" "system/$system_id/backup/$BACKUPID" "fieldselect=backup~backupurl")
 
 if [[ ! -f "${backups_remotepath}/${filename}.tgz" ]]; then
-	logger -p user.error -t MariaDB-Manager-Remote "Target backup file not found."
+	errorMessage="Target backup file ${filename}.tgz not found."
+	logger -p user.error -t MariaDB-Manager-Remote "$errorMessage"
+	set_error "$errorMessage"
 	exit 1
 fi
 
