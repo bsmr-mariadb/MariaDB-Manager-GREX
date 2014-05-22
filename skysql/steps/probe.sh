@@ -35,7 +35,7 @@ mysql_port_busy=false
 new_state='unprovisioned'
 
 # Checking for mysqld on PATH directories
-version_output=$(mysqld --version)
+version_output=$(mysqld --version 2>/dev/null)
 if [[ $? == 0 ]]; then
 	mysqld_found=true
 	echo $version_output | grep "MariaDB.*wsrep"

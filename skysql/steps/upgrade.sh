@@ -21,7 +21,7 @@
 
 . ./remote-scripts-config.sh
 . ./mysql-config.sh
-mkdir -p $backups_remotepath
+[[ ! -d $backups_remotepath ]] && mkdir -p $backups_remotepath
 chown skysqlagent:skysqlagent $backups_remotepath
 
 packageAPI="MariaDB-Manager-API"
