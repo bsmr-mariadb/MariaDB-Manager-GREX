@@ -137,7 +137,7 @@ echo $$ > ./skysql.task.$taskid
 fullpath="$scripts_dir/steps/$step_script.sh $params"
 bash $fullpath            > /tmp/remote.$$.log 2>&1
 return_status=$?
-if [[ $return_status == 0 ]]; then
+if [[ "x$return_status" == "x0" ]]; then
 	pri="user.info"
 else
 	pri="user.error"
